@@ -1,0 +1,80 @@
+/* Root Variables - Pixel Pushers Design System */
+:root {
+  /* Backgrounds */
+  --bg-page: #1a1c1b;
+  --bg-card: #302f2c;
+  --bg-light: #dfddd6;
+  
+  /* Text */
+  --text-primary: #d9fb06;
+  --text-secondary: #888680;
+  --text-muted: #302f2c;
+  --text-inverse: #1a1c1b;
+  --text-white: #ffffff;
+  
+  /* Borders */
+  --border-light: rgba(63, 72, 22, 0.5);
+  --border-medium: #3f4816;
+  --border-strong: #888680;
+  
+  /* Brand Colors */
+  --brand-primary: #d9fb06;
+  --brand-hover: rgba(217, 251, 6, 0.8);
+  --brand-active: rgba(217, 251, 6, 0.6);
+  
+  /* Supporting Colors */
+  --secondary-olive: #3f4816;
+  --secondary-yellow: #f8d47a;
+  --secondary-blue: #0073e6;
+}
+
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-page);
+  color: var(--text-white);
+  font-family: 'Inter', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', Arial, sans-serif;
+  line-height: 1.2;
+  color: var(--text-white);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Container */
+.container {
+  max-width: 87.5rem;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+@media (max-width: 767px) {
+  .container {
+    padding: 0 20px;
+  }
+}
