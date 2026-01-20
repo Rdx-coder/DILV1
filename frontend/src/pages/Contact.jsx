@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, MapPin, Globe, Send } from 'lucide-react';
 import { mockAPI } from '../mock';
-import { useToast } from '../hooks/use-toast';
+import { toast } from '../components/ui/sonner';
 
 const Contact = () => {
   const { toast } = useToast();
