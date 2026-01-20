@@ -24,10 +24,7 @@ const Contact = () => {
 
     try {
       const response = await mockAPI.submitContact(formData);
-      toast({
-        title: "Success!",
-        description: response.message,
-      });
+      toast.success(response.message);
       // Reset form
       setFormData({
         name: '',
@@ -37,11 +34,7 @@ const Contact = () => {
         interest: 'general'
       });
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive"
-      });
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
