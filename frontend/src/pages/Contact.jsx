@@ -4,7 +4,6 @@ import { mockAPI } from '../mock';
 import { toast } from '../components/ui/sonner';
 
 const Contact = () => {
-  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
