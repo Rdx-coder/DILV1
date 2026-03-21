@@ -415,19 +415,9 @@ metadata:
   test_sequence: 2
 
 test_plan:
-  current_focus:
-    - "Homepage"
-    - "About Page"
-    - "Programs Page"
-    - "Mentorship Page"
-    - "Transparency Page"
-    - "Support Page"
-    - "Contact Page"
-    - "Navigation and Routing"
-    - "Responsive Design"
-    - "Error Handling"
+  current_focus: []
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
