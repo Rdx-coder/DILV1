@@ -40,6 +40,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchStats();
     fetchSubmissions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
   const fetchStats = async () => {
