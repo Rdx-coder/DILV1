@@ -23,16 +23,30 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await mockAPI.submitContact(formData);
-      toast.success(response.message);
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: '',
-        interest: 'general'
+      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+      const response = await fetch(`${BACKEND_URL}/api/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
       });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success(data.message);
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          subject: '',
+          message: '',
+          interest: 'general'
+        });
+      } else {
+        toast.error(data.message || "Something went wrong. Please try again.");
+      }
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
     } finally {
