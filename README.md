@@ -34,7 +34,7 @@ Production-ready nonprofit website with Node.js backend and React frontend, feat
 
 **Default Credentials:**
 - Email: admin@dangiinnovationlab.com
-- Password: Admin@123
+- Password: ----
 
 **⚠️ IMPORTANT:** Change default password in production!
 
