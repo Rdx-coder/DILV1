@@ -240,23 +240,43 @@ exports.deleteSubmission = async (req, res) => {
 // @access  Private
 exports.getStats = async (req, res) => {
   try {
-    const totalSubmissions = await Submission.countDocuments();
-    const newSubmissions = await Submission.countDocuments({ status: 'new' });
-    const inProgressSubmissions = await Submission.countDocuments({ status: 'in_progress' });
-    const repliedSubmissions = await Submission.countDocuments({ status: 'replied' });
-    const closedSubmissions = await Submission.countDocuments({ status: 'closed' });
-
-    // Form type breakdown
-    const contactForms = await Submission.countDocuments({ formType: 'contact' });
-    const applications = await Submission.countDocuments({ formType: 'application' });
-    const mentorshipForms = await Submission.countDocuments({ formType: 'mentorship' });
-    const newsletterSubs = await Submission.countDocuments({ formType: 'newsletter' });
-
-    // Recent submissions (last 7 days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const recentSubmissions = await Submission.countDocuments({
-      createdAt: { $gte: sevenDaysAgo }
+
+    // Use aggregation pipeline for efficient stats calculation
+    const statsResult = await Submission.aggregate([
+      {
+        $facet: {
+          totalCount: [{ $count: 'count' }],
+          byStatus: [
+            { $group: { _id: '$status', count: { $sum: 1 } } }
+          ],
+          byFormType: [
+            { $group: { _id: '$formType', count: { $sum: 1 } } }
+          ],
+          recentCount: [
+            { $match: { createdAt: { $gte: sevenDaysAgo } } },
+            { $count: 'count' }
+          ]
+        }
+      }
+    ]);
+
+    // Parse aggregation results
+    const result = statsResult[0];
+    const totalSubmissions = result.totalCount[0]?.count || 0;
+    const recentSubmissions = result.recentCount[0]?.count || 0;
+
+    // Parse status counts
+    const statusMap = {};
+    result.byStatus.forEach(item => {
+      statusMap[item._id] = item.count;
+    });
+
+    // Parse form type counts
+    const formTypeMap = {};
+    result.byFormType.forEach(item => {
+      formTypeMap[item._id] = item.count;
     });
 
     res.status(200).json({
@@ -264,16 +284,16 @@ exports.getStats = async (req, res) => {
       stats: {
         total: totalSubmissions,
         byStatus: {
-          new: newSubmissions,
-          inProgress: inProgressSubmissions,
-          replied: repliedSubmissions,
-          closed: closedSubmissions
+          new: statusMap['new'] || 0,
+          inProgress: statusMap['in_progress'] || 0,
+          replied: statusMap['replied'] || 0,
+          closed: statusMap['closed'] || 0
         },
         byFormType: {
-          contact: contactForms,
-          application: applications,
-          mentorship: mentorshipForms,
-          newsletter: newsletterSubs
+          contact: formTypeMap['contact'] || 0,
+          application: formTypeMap['application'] || 0,
+          mentorship: formTypeMap['mentorship'] || 0,
+          newsletter: formTypeMap['newsletter'] || 0
         },
         recentSubmissions
       }
