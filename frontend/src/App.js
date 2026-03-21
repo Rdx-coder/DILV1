@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -46,6 +46,8 @@ function App() {
                     <Route path="/transparency" element={<Transparency />} />
                     <Route path="/support" element={<Support />} />
                     <Route path="/contact" element={<Contact />} />
+                    {/* Catch-all route for unknown paths */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </main>
                 <Footer />
