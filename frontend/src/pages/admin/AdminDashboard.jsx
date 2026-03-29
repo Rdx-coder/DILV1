@@ -5,11 +5,13 @@ import {
   Mail, 
   FileText, 
   UserCheck, 
+  Globe,
   Filter,
   Search,
   Send,
   X,
-  Trash2
+  Trash2,
+  BookOpen
 } from 'lucide-react';
 import { toast } from '../../components/ui/sonner';
 import { getAuthHeaders, logout, getAdminData } from '../../utils/auth';
@@ -33,6 +35,11 @@ const AdminDashboard = () => {
     message: ''
   });
   const [sendingReply, setSendingReply] = useState(false);
+  const [seoPingLogs, setSeoPingLogs] = useState([]);
+  const [pingingSitemap, setPingingSitemap] = useState(false);
+  const [retryingFailed, setRetryingFailed] = useState(false);
+  const [seoQueueSummary, setSeoQueueSummary] = useState({ queuedCount: 0, exhaustedCount: 0 });
+  const [expandedSeoLogId, setExpandedSeoLogId] = useState('');
 
   const adminData = getAdminData();
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -42,6 +49,76 @@ const AdminDashboard = () => {
     fetchSubmissions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
+
+  useEffect(() => {
+    fetchSeoPingHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const fetchSeoPingHistory = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/seo/ping-history?limit=8`, {
+        headers: getAuthHeaders()
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSeoPingLogs(data.logs || []);
+        setSeoQueueSummary({
+          queuedCount: data.queuedCount || 0,
+          exhaustedCount: data.exhaustedCount || 0
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching SEO ping history:', error);
+    }
+  };
+
+  const handleManualSitemapPing = async () => {
+    try {
+      setPingingSitemap(true);
+      const response = await fetch(`${BACKEND_URL}/api/admin/seo/ping-sitemap`, {
+        method: 'POST',
+        headers: getAuthHeaders()
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success('Sitemap pinged successfully');
+      } else {
+        toast.error(data.message || 'Sitemap ping failed');
+      }
+
+      fetchSeoPingHistory();
+    } catch (error) {
+      toast.error('Failed to ping sitemap');
+    } finally {
+      setPingingSitemap(false);
+    }
+  };
+
+  const handleRetryFailedNow = async () => {
+    try {
+      setRetryingFailed(true);
+      const response = await fetch(`${BACKEND_URL}/api/admin/seo/retry-failed`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ limit: 12 })
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success(`Retry queue processed (${data.processed || 0} logs)`);
+      } else {
+        toast.error(data.message || 'Retry queue processing failed');
+      }
+
+      fetchSeoPingHistory();
+    } catch (error) {
+      toast.error('Failed to process retry queue');
+    } finally {
+      setRetryingFailed(false);
+    }
+  };
 
   const fetchStats = async () => {
     try {
@@ -191,6 +268,21 @@ const AdminDashboard = () => {
     });
   };
 
+  const getSeoStatusBadgeClass = (log) => {
+    const totalTargets = Math.max(0, log.totalTargets ?? (Array.isArray(log.results) ? log.results.length : 0));
+    if (totalTargets === 0) return 'seo-badge-neutral';
+    const ratio = (log.successCount || 0) / totalTargets;
+    if (ratio >= 1) return 'seo-badge-success';
+    if (ratio > 0) return 'seo-badge-partial';
+    return 'seo-badge-failed';
+  };
+
+  const getEngineLabel = (url = '') => {
+    if (url.includes('google')) return 'Google';
+    if (url.includes('bing')) return 'Bing';
+    return 'Search Engine';
+  };
+
   return (
     <div className="admin-dashboard">
       <header className="admin-header">
@@ -202,6 +294,10 @@ const AdminDashboard = () => {
           <button onClick={handleLogout} className="btn-secondary">
             <LogOut size={18} />
             Logout
+          </button>
+          <button onClick={() => navigate('/admin/blogs')} className="btn-secondary">
+            <BookOpen size={18} />
+            Blog Manager
           </button>
         </div>
       </header>
@@ -246,6 +342,96 @@ const AdminDashboard = () => {
           </div>
         </div>
       )}
+
+      <section className="admin-seo-monitor">
+        <div className="admin-seo-monitor-header">
+          <h2>SEO Monitor</h2>
+          <div className="admin-seo-actions">
+            <button className="btn-secondary" type="button" onClick={handleManualSitemapPing} disabled={pingingSitemap}>
+              <Globe size={16} />
+              {pingingSitemap ? 'Pinging...' : 'Ping Sitemap'}
+            </button>
+            <button className="btn-secondary" type="button" onClick={handleRetryFailedNow} disabled={retryingFailed || seoQueueSummary.queuedCount === 0}>
+              {retryingFailed ? 'Retrying...' : 'Retry Failed Now'}
+            </button>
+          </div>
+        </div>
+
+        <div className="admin-seo-summary-row">
+          <span className="admin-seo-summary-chip">Queued retries: {seoQueueSummary.queuedCount}</span>
+          <span className="admin-seo-summary-chip">Exhausted: {seoQueueSummary.exhaustedCount}</span>
+        </div>
+
+        {seoPingLogs.length === 0 ? (
+          <div className="empty-state">No sitemap ping activity yet</div>
+        ) : (
+          <div className="admin-seo-log-list">
+            {seoPingLogs.map((item) => (
+              <div key={item._id} className="admin-seo-log-item">
+                <div>
+                  <p className="admin-seo-log-title-row">
+                    {(() => {
+                      const totalTargets = Math.max(0, item.totalTargets ?? (Array.isArray(item.results) ? item.results.length : 0));
+                      if (totalTargets === 0) {
+                        return (
+                          <>
+                            <span className={`admin-seo-status-badge ${getSeoStatusBadgeClass(item)}`}>
+                              Modern mode
+                            </span>
+                            <strong>No external ping targets</strong>
+                          </>
+                        );
+                      }
+
+                      return (
+                        <>
+                          <span className={`admin-seo-status-badge ${getSeoStatusBadgeClass(item)}`}>
+                            {item.success ? 'Success' : 'Failed'}
+                          </span>
+                          <strong>{item.successCount}/{totalTargets} engines</strong>
+                        </>
+                      );
+                    })()}
+                    {item.retryStatus ? <span className="admin-seo-retry-status">Retry: {item.retryStatus}</span> : null}
+                  </p>
+                  <p>{item.triggerType === 'auto' ? 'Auto trigger' : 'Manual trigger'} {item.reason ? `- ${item.reason}` : ''}</p>
+                </div>
+                <div className="admin-seo-log-right">
+                  <p>{formatDate(item.createdAt)}</p>
+                  <button
+                    type="button"
+                    className="admin-seo-detail-toggle"
+                    onClick={() => setExpandedSeoLogId((prev) => (prev === item._id ? '' : item._id))}
+                  >
+                    {expandedSeoLogId === item._id ? 'Hide details' : 'View details'}
+                  </button>
+                </div>
+
+                {expandedSeoLogId === item._id ? (
+                  <div className="admin-seo-log-details">
+                    {(item.results || []).map((result, index) => (
+                      <div key={`${item._id}-result-${index}`} className="admin-seo-engine-row">
+                        <div>
+                          <strong>{getEngineLabel(result.url)}</strong>
+                          <p>{result.url}</p>
+                        </div>
+                        <div className="admin-seo-engine-meta">
+                          <span className={result.ok ? 'seo-engine-ok' : 'seo-engine-fail'}>
+                            {result.ok ? 'OK' : 'Error'}
+                          </span>
+                          <span>HTTP {result.statusCode || 0}</span>
+                        </div>
+                        {result.error ? <p className="seo-engine-error">{result.error}</p> : null}
+                        {result.body ? <pre>{String(result.body).slice(0, 280)}</pre> : null}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
       <div className="admin-filters">
         <div className="filter-group">

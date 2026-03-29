@@ -12,13 +12,19 @@ import Support from "./pages/Support";
 import Contact from "./pages/Contact";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminBlogs from "./pages/admin/AdminBlogs";
+import AdminBlogEditor from "./pages/admin/AdminBlogEditor";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster } from "./components/ui/sonner";
+import BlogList from "./pages/BlogList";
+import BlogDetail from "./pages/BlogDetail";
+import RouteSEO from "./components/RouteSEO";
 
 function App() {
   return (
     <div className="App">
       <BrowserRouter>
+        <RouteSEO />
         <Routes>
           {/* Admin Routes (no header/footer) */}
           <Route path="/admin/login" element={<AdminLogin />} />
@@ -27,6 +33,30 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/blogs"
+            element={
+              <ProtectedRoute>
+                <AdminBlogs />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/blog/new"
+            element={
+              <ProtectedRoute>
+                <AdminBlogEditor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/blog/edit/:id"
+            element={
+              <ProtectedRoute>
+                <AdminBlogEditor />
               </ProtectedRoute>
             }
           />
@@ -41,6 +71,8 @@ function App() {
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/about" element={<About />} />
+                    <Route path="/blog" element={<BlogList />} />
+                    <Route path="/blog/:slug" element={<BlogDetail />} />
                     <Route path="/programs" element={<Programs />} />
                     <Route path="/mentorship" element={<Mentorship />} />
                     <Route path="/transparency" element={<Transparency />} />
