@@ -6,6 +6,7 @@ const router = express.Router();
 const PUBLIC_SITE_PATHS = [
   '/',
   '/about',
+  '/team',
   '/blog',
   '/programs',
   '/mentorship',

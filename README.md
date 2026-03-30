@@ -70,6 +70,36 @@ cd /app/backend-node && ./test-api.sh
 
 ## 🎯 Quick Start Guide
 
+### 0. Environment Setup
+
+Use the provided example files and create real `.env` files for both apps.
+
+Windows (PowerShell/CMD):
+```bash
+copy backend-node\.env.example backend-node\.env
+copy frontend\.env.example frontend\.env
+```
+
+macOS/Linux:
+```bash
+cp backend-node/.env.example backend-node/.env
+cp frontend/.env.example frontend/.env
+```
+
+Recommended production values:
+```env
+# frontend/.env
+REACT_APP_FRONTEND_URL=https://dangiinnovationlab.com
+REACT_APP_BACKEND_URL=https://your-backend-domain
+SITEMAP_BACKEND_URL=https://your-backend-domain
+
+# backend-node/.env
+FRONTEND_URL=https://dangiinnovationlab.com
+JWT_SECRET=use_a_long_random_secret
+ADMIN_EMAIL=admin@dangiinnovationlab.com
+ADMIN_PASSWORD=use_a_strong_password
+```
+
 ### 1. Configure Email (Optional)
 Edit `/app/backend-node/.env`:
 ```env

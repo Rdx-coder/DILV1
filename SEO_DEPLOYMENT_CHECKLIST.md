@@ -3,6 +3,10 @@
 ## 1. Environment Configuration
 - Set `FRONTEND_URL` in backend environment to your production frontend URL (for canonical links, robots, and sitemap).
 - Set `REACT_APP_BACKEND_URL` in frontend environment to backend public URL.
+- For frontend build-time sitemap generation, set at least one backend URL variable:
+  - `SITEMAP_BACKEND_URL=https://your-backend-domain` (preferred)
+  - or `REACT_APP_BACKEND_URL=https://your-backend-domain`
+- Set `REACT_APP_FRONTEND_URL=https://dangiinnovationlab.com` so generated sitemap URLs use the production domain.
 - Ensure HTTPS is enabled for both frontend and backend domains.
 
 ## 2. Crawl and Index Essentials

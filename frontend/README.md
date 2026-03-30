@@ -29,6 +29,24 @@ Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
+### SEO Sitemap Automation
+
+This project auto-generates `public/sitemap.xml` before every production build.
+
+- `npm run generate:sitemap` generates sitemap manually.
+- `npm run build` automatically runs `prebuild` -> `generate:sitemap`.
+
+To include published blog URLs in the generated sitemap, set one of these environment variables during build:
+
+- `SITEMAP_BACKEND_URL=https://your-backend-domain` (preferred)
+- or `REACT_APP_BACKEND_URL=https://your-backend-domain`
+
+Also set your canonical frontend domain:
+
+- `REACT_APP_FRONTEND_URL=https://dangiinnovationlab.com`
+
+If backend URL is not provided, sitemap generation still succeeds with static routes only.
+
 ### `npm run eject`
 
 **Note: this is a one-way operation. Once you `eject`, you can't go back!**
