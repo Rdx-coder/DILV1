@@ -27,10 +27,15 @@ next-env.d.ts
 
 # Production builds
 /build
+/frontend/build/
 dist/
 dist
 
 # Environment files (comprehensive coverage)
+.env
+.env.*
+!.env.example
+!**/.env.example
 
 *token.json*
 *credentials.json*
@@ -75,6 +80,12 @@ agenthub/agents/youtube/db
 
 # Build caches
 .cache/
+
+# Runtime uploads
+/backend-node/uploads/blog/*
+/backend-node/uploads/team/*
+!/backend-node/uploads/blog/.gitkeep
+!/backend-node/uploads/team/.gitkeep
 
 # Mobile development
 android-sdk/ 

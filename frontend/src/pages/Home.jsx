@@ -18,7 +18,7 @@ const Home = () => {
         </div>
         <div className="hero-content">
           <h1 className="hero-title">
-            Building a globally empowered Dangi community
+            Building globally empowered underserved communities
           </h1>
           <p className="hero-subtitle">
             Through innovation, education, and leadership
@@ -41,8 +41,8 @@ const Home = () => {
             <h2 className="section-title">Welcome to Dangi Innovation Lab</h2>
             <p className="intro-text">
               Dangi Innovation Lab (DIL) is a non-profit, community-driven innovation and education organization 
-              dedicated to empowering the Dangi community worldwide. Operating as a 100% digital-first platform, 
-              we connect students, innovators, and professionals across India, Nepal, and beyond.
+              dedicated to empowering underserved communities worldwide. Operating as a 100% digital-first platform, 
+              we connect students, innovators, and professionals globally.
             </p>
             <p className="intro-text">
               Our mission is simple: to unlock potential through structured mentorship, innovation programs, 

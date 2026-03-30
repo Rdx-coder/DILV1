@@ -84,8 +84,8 @@ const Contact = () => {
                   </div>
                   <div>
                     <h4 className="contact-detail-title">Email</h4>
-                    <a href="mailto:contact@dangiinnovationlab.org" className="contact-detail-value">
-                      contact@dangiinnovationlab.org
+                    <a href="mailto:contact@dangiinnovationlab.com" className="contact-detail-value">
+                      contact@dangiinnovationlab.com
                     </a>
                   </div>
                 </div>
@@ -98,7 +98,7 @@ const Contact = () => {
                     <h4 className="contact-detail-title">Location</h4>
                     <p className="contact-detail-value">
                       100% Digital Platform<br />
-                      Serving India & Nepal
+                      Serving Globally
                     </p>
                   </div>
                 </div>

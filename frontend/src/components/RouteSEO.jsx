@@ -5,8 +5,8 @@ import SEO from './SEO';
 const routeMeta = {
   '/': {
     title: 'Dangi Innovation Lab | Home',
-    description: 'Empowering the Dangi community through innovation, mentorship, education, and leadership.',
-    keywords: 'Dangi Innovation Lab, innovation, mentorship, education, leadership, community'
+    description: 'Empowering underserved communities through innovation, mentorship, education, and leadership.',
+    keywords: 'Dangi Innovation Lab, innovation, mentorship, education, leadership, underserved communities'
   },
   '/about': {
     title: 'About | Dangi Innovation Lab',
@@ -30,7 +30,7 @@ const routeMeta = {
   },
   '/support': {
     title: 'Support | Dangi Innovation Lab',
-    description: 'Support our initiatives and help scale impact in the Dangi community.',
+    description: 'Support our initiatives and help scale impact across underserved communities globally.',
     keywords: 'support dangi innovation lab, donate, partner'
   },
   '/contact': {

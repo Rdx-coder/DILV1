@@ -11,10 +11,10 @@ const Footer = () => {
           <div className="footer-section">
             <h3 className="footer-heading">Dangi Innovation Lab</h3>
             <p className="footer-text">
-              Building a globally empowered Dangi community through innovation, education, and leadership.
+              Building globally empowered underserved communities through innovation, education, and leadership.
             </p>
             <div className="footer-social">
-              <a href="mailto:contact@dangiinnovationlab.org" className="social-link" aria-label="Email">
+              <a href="mailto:contact@dangiinnovationlab.com" className="social-link" aria-label="Email">
                 <Mail size={20} />
               </a>
               <a href="#" className="social-link" aria-label="LinkedIn">
@@ -52,10 +52,11 @@ const Footer = () => {
           <div className="footer-section">
             <h4 className="footer-subheading">Connect</h4>
             <p className="footer-text">100% Digital, Global Platform</p>
-            <p className="footer-text">Serving India & Nepal</p>
+            <p className="footer-text">Serving Globally</p>
+            <p className="footer-text">www.dangiinnovationlab.com</p>
             <p className="footer-text">
-              <a href="mailto:contact@dangiinnovationlab.org" className="footer-email">
-                contact@dangiinnovationlab.org
+              <a href="mailto:contact@dangiinnovationlab.com" className="footer-email">
+                contact@dangiinnovationlab.com
               </a>
             </p>
           </div>

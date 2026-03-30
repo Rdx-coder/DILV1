@@ -86,7 +86,7 @@ const Mentorship = () => {
               <Globe size={32} className="collaboration-icon" />
               <h3 className="collaboration-title">Global Network</h3>
               <p className="collaboration-text">
-                Connect with Dangi community members and allies worldwide, creating a support system 
+                Connect with members of underserved communities and allies worldwide, creating a support system 
                 that transcends geographical boundaries.
               </p>
             </div>
@@ -124,7 +124,7 @@ const Mentorship = () => {
                 <div>
                   <h4 className="principle-title">Community First</h4>
                   <p className="principle-text">
-                    Members of the Dangi community receive priority in program selection and resource allocation
+                    Members of underserved communities receive priority in program selection and resource allocation
                   </p>
                 </div>
               </div>

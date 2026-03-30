@@ -26,7 +26,7 @@ const About = () => {
               </p>
               <p className="content-text">
                 We operate as a 100% digital-first platform, connecting students, young professionals, and innovators 
-                from the Dangi community across India, Nepal, and around the world with experienced mentors and 
+                from underserved communities around the world with experienced mentors and 
                 advisors who are committed to giving back.
               </p>
               <p className="content-text">
@@ -48,7 +48,7 @@ const About = () => {
               </div>
               <h3 className="vm-title">Our Vision</h3>
               <p className="vm-text">
-                To build a globally empowered Dangi community where every individual has access to education, 
+                To build globally empowered underserved communities where every individual has access to education, 
                 innovation opportunities, and the support needed to achieve their full potential.
               </p>
             </div>
@@ -188,7 +188,7 @@ const About = () => {
               <div className="impact-goal">
                 <span className="impact-number">02</span>
                 <p className="impact-goal-text">
-                  Build global recognition for Dangi community members in education, innovation, and leadership
+                  Build global recognition for learners and innovators from underserved communities in education, innovation, and leadership
                 </p>
               </div>
               <div className="impact-goal">

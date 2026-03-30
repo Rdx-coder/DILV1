@@ -104,7 +104,7 @@ const Programs = () => {
               <Target size={32} className="eligibility-icon" />
               <h3 className="eligibility-title">Primary Eligibility</h3>
               <ul className="eligibility-list">
-                <li>Members of the Dangi community (priority)</li>
+                <li>Members of underserved communities (priority)</li>
                 <li>Age 16 and above</li>
                 <li>Committed to 6-month program duration</li>
                 <li>Access to internet and basic computer skills</li>
@@ -115,8 +115,8 @@ const Programs = () => {
               <Users size={32} className="eligibility-icon" />
               <h3 className="eligibility-title">Community-Priority Policy</h3>
               <p className="eligibility-text">
-                DIL prioritizes members of the Dangi community in all program selections. We believe in 
-                strengthening our community first while remaining open to collaboration with like-minded 
+                DIL prioritizes members of underserved communities in all program selections. We believe in 
+                strengthening community opportunity first while remaining open to collaboration with like-minded 
                 individuals who share our values.
               </p>
               <p className="eligibility-text">
