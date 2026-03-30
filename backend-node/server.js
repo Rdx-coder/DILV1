@@ -13,12 +13,15 @@ const submissionRoutes = require('./routes/submissionRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const blogRoutes = require('./routes/blogRoutes');
 const seoRoutes = require('./routes/seoRoutes');
+const teamRoutes = require('./routes/teamRoutes');
 const { processQueuedSeoPings } = require('./controllers/seoController');
 
 const app = express();
 
 // Security Middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' }
+}));
 
 // CORS Configuration
 app.use(cors({
@@ -124,6 +127,7 @@ app.use('/api', (req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api', submissionRoutes);
 app.use('/api', blogRoutes);
+app.use('/api/team', teamRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/', seoRoutes);
 

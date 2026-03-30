@@ -19,6 +19,8 @@ import { Toaster } from "./components/ui/sonner";
 import BlogList from "./pages/BlogList";
 import BlogDetail from "./pages/BlogDetail";
 import RouteSEO from "./components/RouteSEO";
+import Team from "./pages/Team";
+import AdminTeamManager from "./pages/admin/AdminTeamManager";
 
 function App() {
   return (
@@ -52,6 +54,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/admin/blog/edit/:id"
             element={
@@ -60,7 +63,14 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/admin/team"
+            element={
+              <ProtectedRoute>
+                <AdminTeamManager />
+              </ProtectedRoute>
+            }
+          />
           {/* Public Routes (with header/footer) */}
           <Route
             path="/*"
@@ -71,6 +81,7 @@ function App() {
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/about" element={<About />} />
+                    <Route path="/team" element={<Team />} />
                     <Route path="/blog" element={<BlogList />} />
                     <Route path="/blog/:slug" element={<BlogDetail />} />
                     <Route path="/programs" element={<Programs />} />
