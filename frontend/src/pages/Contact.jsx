@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, MapPin, Globe, Send } from 'lucide-react';
-import { toast } from '../components/ui/sonner';
+import { withCsrfHeaders } from '../utils/csrf';
+import { notify } from '../utils/notify';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -11,30 +12,81 @@ const Contact = () => {
     interest: 'general'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const validateField = (name, value) => {
+    const trimmed = String(value || '').trim();
+
+    if (name === 'name') {
+      if (!trimmed) return 'Name is required';
+      if (trimmed.length < 2) return 'Name must be at least 2 characters';
+      return '';
+    }
+
+    if (name === 'email') {
+      if (!trimmed) return 'Email is required';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return 'Enter a valid email address';
+      return '';
+    }
+
+    if (name === 'subject') {
+      if (!trimmed) return 'Subject is required';
+      if (trimmed.length < 3) return 'Subject must be at least 3 characters';
+      return '';
+    }
+
+    if (name === 'message') {
+      if (!trimmed) return 'Message is required';
+      if (trimmed.length < 10) return 'Message must be at least 10 characters';
+      return '';
+    }
+
+    return '';
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setFieldErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const nextErrors = {
+      name: validateField('name', formData.name),
+      email: validateField('email', formData.email),
+      subject: validateField('subject', formData.subject),
+      message: validateField('message', formData.message)
+    };
+
+    setFieldErrors(nextErrors);
+    if (Object.values(nextErrors).some(Boolean)) {
+      notify.error('Please fix form errors before submitting.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-      const response = await fetch(`${BACKEND_URL}/api/contact`, {
-        method: 'POST',
-        headers: {
+      const headers = await withCsrfHeaders(
+        {
           'Content-Type': 'application/json',
         },
+        BACKEND_URL
+      );
+      const response = await fetch(`${BACKEND_URL}/api/contact`, {
+        method: 'POST',
+        headers,
         body: JSON.stringify(formData),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        toast.success(data.message);
+        notify.success(data.message || 'Message sent successfully.');
         // Reset form
         setFormData({
           name: '',
@@ -43,11 +95,14 @@ const Contact = () => {
           message: '',
           interest: 'general'
         });
+        setFieldErrors({});
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 5000);
       } else {
-        toast.error(data.message || "Something went wrong. Please try again.");
+        notify.error(data.message || 'Something went wrong. Please try again.');
       }
     } catch (error) {
-      toast.error("Something went wrong. Please try again.");
+      notify.error('Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -64,6 +119,33 @@ const Contact = () => {
           </p>
         </div>
       </section>
+
+      {/* Success Modal */}
+      {showSuccess && (
+        <div 
+          className="success-modal-overlay"
+          role="dialog"
+          aria-labelledby="success-modal-title"
+          aria-modal="true"
+        >
+          <div className="success-modal">
+            <div className="success-modal-header">
+              <h3 id="success-modal-title">Thank You!</h3>
+            </div>
+            <div className="success-modal-body">
+              <p>Your message has been sent successfully.</p>
+              <p>We'll review your inquiry and get back to you within 2-3 business days.</p>
+            </div>
+            <button 
+              onClick={() => setShowSuccess(false)}
+              className="btn-primary"
+                          aria-label="Close success message"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Contact Content */}
       <section className="contact-section">
@@ -137,9 +219,11 @@ const Contact = () => {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="form-input"
+                    className={`form-input ${fieldErrors.name ? 'form-input-error' : ''}`}
                     placeholder="Your name"
+                    aria-invalid={Boolean(fieldErrors.name)}
                   />
+                  {fieldErrors.name ? <p className="form-error-text">{fieldErrors.name}</p> : null}
                 </div>
 
                 <div className="form-group">
@@ -151,9 +235,11 @@ const Contact = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="form-input"
+                    className={`form-input ${fieldErrors.email ? 'form-input-error' : ''}`}
                     placeholder="your.email@example.com"
+                    aria-invalid={Boolean(fieldErrors.email)}
                   />
+                  {fieldErrors.email ? <p className="form-error-text">{fieldErrors.email}</p> : null}
                 </div>
 
                 <div className="form-group">
@@ -184,9 +270,11 @@ const Contact = () => {
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                    className="form-input"
+                    className={`form-input ${fieldErrors.subject ? 'form-input-error' : ''}`}
                     placeholder="Brief subject line"
+                    aria-invalid={Boolean(fieldErrors.subject)}
                   />
+                  {fieldErrors.subject ? <p className="form-error-text">{fieldErrors.subject}</p> : null}
                 </div>
 
                 <div className="form-group">
@@ -198,15 +286,18 @@ const Contact = () => {
                     onChange={handleChange}
                     required
                     rows="6"
-                    className="form-textarea"
+                    className={`form-textarea ${fieldErrors.message ? 'form-input-error' : ''}`}
                     placeholder="Tell us more about your inquiry..."
+                    aria-invalid={Boolean(fieldErrors.message)}
                   ></textarea>
+                  {fieldErrors.message ? <p className="form-error-text">{fieldErrors.message}</p> : null}
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
                   className="btn-primary btn-submit"
+                                  aria-label={isSubmitting ? "Sending your message" : "Send your message"}
                 >
                   {isSubmitting ? 'Sending...' : (
                     <>

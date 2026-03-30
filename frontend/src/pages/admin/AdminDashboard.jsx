@@ -19,8 +19,9 @@ import {
   Clock,
   CheckCircle
 } from 'lucide-react';
-import { toast } from '../../components/ui/sonner';
 import { getAuthHeaders, logout, getAdminData } from '../../utils/auth';
+import { withCsrfHeaders } from '../../utils/csrf';
+import { notify } from '../../utils/notify';
 import Sidebar from '../../components/admin/Sidebar';
 
 const AdminDashboard = () => {
@@ -104,21 +105,22 @@ const AdminDashboard = () => {
   const handleManualSitemapPing = async () => {
     try {
       setPingingSitemap(true);
+      const headers = await withCsrfHeaders(getAuthHeaders(), BACKEND_URL);
       const response = await fetch(`${BACKEND_URL}/api/admin/seo/ping-sitemap`, {
         method: 'POST',
-        headers: getAuthHeaders()
+        headers
       });
       const data = await response.json();
 
       if (data.success) {
-        toast.success('Sitemap pinged successfully');
+        notify.success('Sitemap pinged successfully');
       } else {
-        toast.error(data.message || 'Sitemap ping failed');
+        notify.error(data.message || 'Sitemap ping failed');
       }
 
       fetchSeoPingHistory();
     } catch (error) {
-      toast.error('Failed to ping sitemap');
+      notify.error('Failed to ping sitemap');
     } finally {
       setPingingSitemap(false);
     }
@@ -127,22 +129,23 @@ const AdminDashboard = () => {
   const handleRetryFailedNow = async () => {
     try {
       setRetryingFailed(true);
+      const headers = await withCsrfHeaders(getAuthHeaders(), BACKEND_URL);
       const response = await fetch(`${BACKEND_URL}/api/admin/seo/retry-failed`, {
         method: 'POST',
-        headers: getAuthHeaders(),
+        headers,
         body: JSON.stringify({ limit: 12 })
       });
       const data = await response.json();
 
       if (data.success) {
-        toast.success(`Retry queue processed (${data.processed || 0} logs)`);
+        notify.success(`Retry queue processed (${data.processed || 0} logs)`);
       } else {
-        toast.error(data.message || 'Retry queue processing failed');
+        notify.error(data.message || 'Retry queue processing failed');
       }
 
       fetchSeoPingHistory();
     } catch (error) {
-      toast.error('Failed to process retry queue');
+      notify.error('Failed to process retry queue');
     } finally {
       setRetryingFailed(false);
     }
@@ -182,7 +185,7 @@ const AdminDashboard = () => {
       }
     } catch (error) {
       console.error('Error fetching submissions:', error);
-      toast.error('Failed to load submissions');
+      notify.error('Failed to load submissions');
     } finally {
       setLoading(false);
     }
@@ -190,27 +193,28 @@ const AdminDashboard = () => {
 
   const handleLogout = () => {
     logout();
-    toast.success('Logged out successfully');
+    notify.success('Logged out successfully');
     navigate('/admin/login');
   };
 
   const handleStatusChange = async (submissionId, newStatus) => {
     try {
+      const headers = await withCsrfHeaders(getAuthHeaders(), BACKEND_URL);
       const response = await fetch(`${BACKEND_URL}/api/admin/submissions/${submissionId}/status`, {
         method: 'PUT',
-        headers: getAuthHeaders(),
+        headers,
         body: JSON.stringify({ status: newStatus })
       });
       const data = await response.json();
       if (data.success) {
-        toast.success('Status updated successfully');
+        notify.success('Status updated successfully');
         fetchSubmissions();
         fetchStats();
       } else {
-        toast.error(data.message);
+        notify.error(data.message || 'Failed to update status');
       }
     } catch (error) {
-      toast.error('Failed to update status');
+      notify.error('Failed to update status');
     }
   };
 
@@ -231,28 +235,29 @@ const AdminDashboard = () => {
 
   const handleSendReply = async () => {
     if (!replyData.message.trim()) {
-      toast.error('Please enter a message');
+      notify.error('Please enter a message');
       return;
     }
 
     setSendingReply(true);
     try {
+      const headers = await withCsrfHeaders(getAuthHeaders(), BACKEND_URL);
       const response = await fetch(`${BACKEND_URL}/api/admin/submissions/${selectedSubmission._id}/reply`, {
         method: 'POST',
-        headers: getAuthHeaders(),
+        headers,
         body: JSON.stringify(replyData)
       });
       const data = await response.json();
       if (data.success) {
-        toast.success('Reply sent successfully');
+        notify.success('Reply sent successfully');
         closeReplyModal();
         fetchSubmissions();
         fetchStats();
       } else {
-        toast.error(data.message);
+        notify.error(data.message || 'Failed to send reply');
       }
     } catch (error) {
-      toast.error('Failed to send reply');
+      notify.error('Failed to send reply');
     } finally {
       setSendingReply(false);
     }
@@ -264,20 +269,21 @@ const AdminDashboard = () => {
     }
 
     try {
+      const headers = await withCsrfHeaders(getAuthHeaders(), BACKEND_URL);
       const response = await fetch(`${BACKEND_URL}/api/admin/submissions/${submissionId}`, {
         method: 'DELETE',
-        headers: getAuthHeaders()
+        headers
       });
       const data = await response.json();
       if (data.success) {
-        toast.success('Submission deleted successfully');
+        notify.success('Submission deleted successfully');
         fetchSubmissions();
         fetchStats();
       } else {
-        toast.error(data.message);
+        notify.error(data.message || 'Failed to delete submission');
       }
     } catch (error) {
-      toast.error('Failed to delete submission');
+      notify.error('Failed to delete submission');
     }
   };
 
@@ -422,6 +428,37 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               )}
+
+              {stats ? (
+                <div className="card analytics-insights">
+                  <div className="card-header">
+                    <h2>Analytics Insights</h2>
+                  </div>
+                  <div className="analytics-insights-grid">
+                    {['contact', 'application', 'mentorship', 'newsletter'].map((type) => {
+                      const count = Number(stats.byFormType?.[type] || 0);
+                      const total = Math.max(1, Number(stats.total || 0));
+                      const ratio = Math.round((count / total) * 100);
+
+                      return (
+                        <div key={type} className="analytics-insight-item">
+                          <div className="analytics-insight-top">
+                            <p className="analytics-insight-name">{type}</p>
+                            <span className="analytics-insight-value">{count}</span>
+                          </div>
+                          <div className="status-bar">
+                            <div
+                              className="status-bar-fill"
+                              style={{ width: `${ratio}%`, backgroundColor: '#d9fb06' }}
+                            />
+                          </div>
+                          <p className="analytics-insight-meta">{ratio}% of total submissions</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
 
               {/* Two Column Layout */}
               <div className="dashboard-grid">

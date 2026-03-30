@@ -51,6 +51,10 @@ const TeamMemberSchema = new mongoose.Schema({
   }
 });
 
+// Common query patterns: public active members sorted by display order.
+TeamMemberSchema.index({ isActive: 1, order: 1 });
+TeamMemberSchema.index({ createdAt: -1 });
+
 // Auto-update the updatedAt field
 TeamMemberSchema.pre('save', function(next) {
   this.updatedAt = Date.now();

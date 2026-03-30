@@ -1,5 +1,7 @@
 const express = require('express');
 const Blog = require('../models/Blog');
+const requireIntegrationApiKey = require('../middleware/apiKeyAuth');
+const { pingSitemap } = require('../controllers/seoController');
 
 const router = express.Router();
 
@@ -95,5 +97,8 @@ ${allUrls
     });
   }
 });
+
+// Third-party integrations can trigger sitemap ping using an API key.
+router.post('/api/integrations/seo/ping-sitemap', requireIntegrationApiKey, pingSitemap);
 
 module.exports = router;

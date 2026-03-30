@@ -1,9 +1,118 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Users, Lightbulb, GraduationCap, TrendingUp } from 'lucide-react';
 import { mockData } from '../mock';
 
 const Home = () => {
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+  const [latestBlogs, setLatestBlogs] = useState([]);
+  const [successStories, setSuccessStories] = useState([]);
+
+  const impactMetrics = [
+    {
+      label: 'Program Completion Rate',
+      value: '89%',
+      progress: 89,
+      context: 'Learners who complete full cycle'
+    },
+    {
+      label: 'Scholarship Conversion',
+      value: '62%',
+      progress: 62,
+      context: 'Applicants receiving offers'
+    },
+    {
+      label: 'Mentorship Satisfaction',
+      value: '94%',
+      progress: 94,
+      context: 'Participants rating 4+ stars'
+    },
+    {
+      label: 'Community Retention',
+      value: '78%',
+      progress: 78,
+      context: 'Alumni active after 1 year'
+    }
+  ];
+
+  const trustBadges = [
+    {
+      name: 'Education Partner Network',
+      category: 'Partner',
+      detail: 'Collaborating with institutions and mentors across regions.'
+    },
+    {
+      name: 'Transparent Operations Standard',
+      category: 'Certification',
+      detail: 'Structured reporting and documented decision trails for programs.'
+    },
+    {
+      name: 'Community Impact Recognition 2025',
+      category: 'Award',
+      detail: 'Recognized for measurable outcomes in underserved communities.'
+    },
+    {
+      name: 'Digital Safety Commitment',
+      category: 'Compliance',
+      detail: 'Secure-first handling of submissions, mentorship, and member data.'
+    }
+  ];
+
+  const faqItems = [
+    {
+      question: 'Who can apply for DIL programs?',
+      answer: 'We prioritize underserved communities globally. Applicants should be committed to the full learning cycle and community contribution.'
+    },
+    {
+      question: 'How does mentorship work?',
+      answer: 'Each participant receives structured guidance through mentor check-ins, milestone planning, and practical feedback sessions.'
+    },
+    {
+      question: 'Are programs online or in-person?',
+      answer: 'DIL follows a digital-first model, so sessions, workshops, and resources are delivered online for global accessibility.'
+    },
+    {
+      question: 'How are applicants selected?',
+      answer: 'Selections are made through documented criteria that consider motivation, fit, and potential impact, with transparency in decisions.'
+    },
+    {
+      question: 'Is there any fee to join?',
+      answer: 'Core opportunities are community-focused and designed to lower access barriers. Any specific requirements are shared clearly per program cycle.'
+    },
+    {
+      question: 'How can mentors or partners contribute?',
+      answer: 'Professionals and organizations can support through mentorship, workshops, or strategic collaboration in areas aligned with our mission.'
+    }
+  ];
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const [blogsRes, storiesRes] = await Promise.all([
+          fetch(`${BACKEND_URL}/api/blogs?limit=3&page=1`),
+          fetch(`${BACKEND_URL}/api/blogs?category=success-story&limit=3`)
+        ]);
+
+        const blogsData = await blogsRes.json();
+        const storiesData = await storiesRes.json();
+
+        if (blogsData.success) {
+          setLatestBlogs(blogsData.blogs || []);
+        }
+        if (storiesData.success) {
+          setSuccessStories(storiesData.blogs || []);
+        }
+      } catch (_error) {
+        setLatestBlogs([]);
+        setSuccessStories([]);
+      }
+    };
+
+    if (BACKEND_URL) {
+      fetchContent();
+    }
+  }, [BACKEND_URL]);
+
   return (
     <div className="page-container">
       {/* Hero Section */}
@@ -24,13 +133,17 @@ const Home = () => {
             Through innovation, education, and leadership
           </p>
           <div className="hero-buttons">
-            <Link to="/programs" className="btn-primary">
-              Apply for Programs
+            <Link to="/programs" className="btn-primary hero-cta-primary">
+              Apply for Programs <ArrowRight size={18} />
             </Link>
-            <Link to="/mentorship" className="btn-secondary">
+            <Link to="/mentorship" className="btn-secondary hero-cta-secondary">
               Become a Mentor
             </Link>
+            <Link to="/support" className="btn-secondary hero-cta-secondary">
+              Support Our Mission
+            </Link>
           </div>
+          <p className="hero-cta-note">Limited seats each cycle. Early applications get priority review.</p>
         </div>
       </section>
 
@@ -165,6 +278,174 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Impact Dashboard Section */}
+      <section className="impact-dashboard-section">
+        <div className="container">
+          <div className="impact-dashboard-header">
+            <h2 className="section-title">Impact Dashboard</h2>
+            <p className="impact-dashboard-subtitle">
+              A quick view of community outcomes across mentorship, scholarships, and startup support.
+            </p>
+          </div>
+
+          <div className="impact-dashboard-grid">
+            <article className="impact-dashboard-highlight">
+              <h3>Annual Snapshot</h3>
+              <p>
+                Over the last 12 months, DIL supported <strong>{mockData.stats.studentsServed} learners</strong> with
+                direct mentorship, enabled <strong>{mockData.stats.activeProjects} projects</strong>, and expanded into
+                <strong> {mockData.stats.communities} communities</strong>.
+              </p>
+            </article>
+
+            <div className="impact-dashboard-metrics">
+              {impactMetrics.map((metric) => (
+                <article key={metric.label} className="impact-metric-card">
+                  <div className="impact-metric-top">
+                    <h3>{metric.label}</h3>
+                    <span>{metric.value}</span>
+                  </div>
+                  <div className="impact-progress-track" aria-hidden="true">
+                    <div className="impact-progress-fill" style={{ width: `${metric.progress}%` }} />
+                  </div>
+                  <p>{metric.context}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="testimonials-section">
+        <div className="container">
+          <div className="testimonials-header">
+            <h2 className="section-title">Stories from Our Alumni</h2>
+            <p className="testimonials-subtitle">
+              Real journeys from learners and innovators who transformed ideas into measurable impact.
+            </p>
+            <Link to="/success-stories" className="btn-secondary testimonials-cta">View all stories</Link>
+          </div>
+          <div className="testimonials-grid">
+            {successStories.length > 0 ? (
+              successStories.map((story) => (
+                <article key={story._id} className="testimonial-card">
+                  {story.coverImage && (
+                    <img
+                      src={story.coverImage}
+                      alt={story.coverImageAlt || story.title}
+                      className="testimonial-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  )}
+                  <div className="testimonial-content">
+                    <h3 className="testimonial-name">{story.title}</h3>
+                    <p className="testimonial-role">{story.author}</p>
+                    <p className="testimonial-quote">{story.excerpt}</p>
+                    <Link to={`/blog/${story.slug}`} className="testimonial-read-more">
+                      Read full story →
+                    </Link>
+                  </div>
+                </article>
+              ))
+            ) : (
+              <p className="testimonials-empty">Success stories coming soon...</p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Badges Section */}
+      <section className="trust-badges-section">
+        <div className="container">
+          <div className="trust-badges-header">
+            <h2 className="section-title">Trusted by Community and Partners</h2>
+            <p className="trust-badges-subtitle">
+              Built on transparent operations, verified collaborations, and impact-focused execution.
+            </p>
+          </div>
+
+          <div className="trust-badges-grid">
+            {trustBadges.map((badge) => (
+              <article key={badge.name} className="trust-badge-card">
+                <p className="trust-badge-type">{badge.category}</p>
+                <h3 className="trust-badge-name">{badge.name}</h3>
+                <p className="trust-badge-detail">{badge.detail}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="home-faq-section">
+        <div className="container">
+          <div className="home-faq-header">
+            <h2 className="section-title">Frequently Asked Questions</h2>
+            <p className="home-faq-subtitle">
+              Answers to common questions about programs, mentorship, and applications.
+            </p>
+          </div>
+
+          <div className="home-faq-grid">
+            {faqItems.map((item) => (
+              <article key={item.question} className="home-faq-card">
+                <h3>{item.question}</h3>
+                <p>{item.answer}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Latest Blogs */}
+      {latestBlogs.length > 0 ? (
+        <section className="home-latest-blog-section">
+          <div className="container">
+            <div className="home-latest-blog-header">
+              <h2 className="section-title">Latest from Our Blog</h2>
+              <Link to="/blog" className="btn-secondary">View All</Link>
+            </div>
+            <div className="home-latest-blog-grid">
+              {latestBlogs.map((blog) => (
+                <article key={blog._id} className="home-latest-blog-card">
+                  {blog.coverImage ? (
+                    <Link to={`/blog/${blog.slug}`}>
+                      <picture>
+                        <source
+                          srcSet={blog.coverImage.replace(/\.(jpe?g|png)(\?.*)?$/i, '.webp$2')}
+                          type="image/webp"
+                        />
+                        <img
+                          src={blog.coverImage}
+                          alt={blog.coverImageAlt || blog.title}
+                          className="home-latest-blog-image"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </picture>
+                    </Link>
+                  ) : null}
+                  <div className="home-latest-blog-content">
+                    <p className="home-latest-blog-meta">
+                      <span>{blog.category}</span>
+                      <span>{new Date(blog.createdAt).toLocaleDateString()}</span>
+                    </p>
+                    <h3>
+                      <Link to={`/blog/${blog.slug}`}>{blog.title}</Link>
+                    </h3>
+                    <p>
+                      {blog.excerpt || String(blog.content || '').replace(/<[^>]*>/g, ' ').trim().slice(0, 130)}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {/* CTA Section */}
       <section className="cta-section">

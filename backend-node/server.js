@@ -15,6 +15,7 @@ const blogRoutes = require('./routes/blogRoutes');
 const seoRoutes = require('./routes/seoRoutes');
 const teamRoutes = require('./routes/teamRoutes');
 const { processQueuedSeoPings } = require('./controllers/seoController');
+const { issueCsrfToken, requireCsrf } = require('./middleware/csrf');
 
 const app = express();
 
@@ -24,15 +25,24 @@ app.use(helmet({
 }));
 
 // CORS Configuration
+const corsOrigin = process.env.FRONTEND_URL || 'http://localhost:3000';
 app.use(cors({
-  origin: '*',
-  credentials: true
+  origin: corsOrigin,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token']
 }));
 
 // Body Parser
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  maxAge: process.env.UPLOADS_CACHE_MAX_AGE || '7d',
+  etag: true,
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', `public, max-age=${parseInt(process.env.UPLOADS_CACHE_MAX_AGE_SECONDS || String(7 * 24 * 60 * 60), 10)}, immutable`);
+  }
+}));
 
 // Logging
 if (process.env.NODE_ENV === 'development') {
@@ -71,6 +81,11 @@ async function initializeAdmin() {
     const adminCount = await Admin.countDocuments();
     
     if (adminCount === 0) {
+      if (!Admin.isStrongPassword(process.env.ADMIN_PASSWORD)) {
+        console.error('✗ ADMIN_PASSWORD is not strong enough. Use 12+ chars including uppercase, lowercase, number, and special character.');
+        return;
+      }
+
       const admin = await Admin.create({
         email: process.env.ADMIN_EMAIL,
         password: process.env.ADMIN_PASSWORD,
@@ -117,6 +132,31 @@ app.get('/api/health', (req, res) => {
     environment: process.env.NODE_ENV
   });
 });
+// Client-side error reporting endpoint (no CSRF required).
+app.post('/api/client-errors', (req, res) => {
+  try {
+    const payload = req.body || {};
+    const report = {
+      message: String(payload.message || 'Unknown client error').slice(0, 2000),
+      stack: String(payload.stack || '').slice(0, 8000),
+      source: String(payload.source || 'frontend').slice(0, 120),
+      path: String(payload.path || '').slice(0, 500),
+      userAgent: String(payload.userAgent || req.get('user-agent') || '').slice(0, 500),
+      timestamp: new Date().toISOString()
+    };
+
+    console.error('[CLIENT_ERROR_LOG]', report);
+    return res.status(202).json({ success: true });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Failed to record client error' });
+  }
+});
+
+// CSRF token route
+app.get('/api/csrf-token', issueCsrfToken);
+
+// Enforce CSRF tokens on non-idempotent API requests
+app.use('/api', requireCsrf);
 
 // API Routes
 app.use('/api', (req, res, next) => {

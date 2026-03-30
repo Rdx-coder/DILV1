@@ -148,7 +148,7 @@ exports.updateStatus = async (req, res) => {
 // @access  Private
 exports.replyToSubmission = async (req, res) => {
   try {
-    const { message, subject } = req.body;
+    const { message, subject, template } = req.body;
 
     if (!message) {
       return res.status(400).json({
@@ -171,6 +171,7 @@ exports.replyToSubmission = async (req, res) => {
       to: submission.email,
       subject: subject || `Re: ${submission.subject || 'Your inquiry'}`,
       message,
+      template: String(template || 'general').trim().toLowerCase(),
       originalSubmission: submission
     });
 

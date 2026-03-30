@@ -69,6 +69,8 @@ const blogSchema = new mongoose.Schema({
   },
   category: {
     type: String,
+    enum: ['general', 'success-story', 'tutorial', 'announcement'],
+    default: 'general',
     required: true,
     trim: true,
     index: true
@@ -97,6 +99,11 @@ const blogSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+// Common query patterns: published lists by recency, category/status filtering, and tags.
+blogSchema.index({ status: 1, createdAt: -1 });
+blogSchema.index({ category: 1, status: 1, createdAt: -1 });
+blogSchema.index({ tags: 1, status: 1, createdAt: -1 });
 
 blogSchema.pre('validate', async function(next) {
   try {

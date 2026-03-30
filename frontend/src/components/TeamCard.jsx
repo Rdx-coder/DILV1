@@ -1,7 +1,8 @@
-import React from 'react';
-import { Linkedin, Mail, Globe } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Linkedin, Mail, Globe, Github } from 'lucide-react';
 
 const TeamCard = ({ member }) => {
+  const [isBioExpanded, setIsBioExpanded] = useState(false);
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
   const assetBase = BACKEND_URL.replace(/\/api\/?$/, '').replace(/\/$/, '');
   const fallbackAvatar = `data:image/svg+xml;utf8,${encodeURIComponent(
@@ -34,15 +35,27 @@ const TeamCard = ({ member }) => {
   };
 
   const imageSrc = resolveImageUrl(member.image?.url);
+  const webpSrc = imageSrc.replace(/\.(jpe?g|png)(\?.*)?$/i, '.webp$2');
+  const fullBio = String(member.bio || '').trim();
+  const shouldTruncateBio = fullBio.length > 150;
+  const bioPreview = useMemo(() => {
+    if (!shouldTruncateBio) return fullBio;
+    return `${fullBio.slice(0, 150).trim()}...`;
+  }, [fullBio, shouldTruncateBio]);
 
   return (
     <div className="team-card">
       <div className="team-card-image-wrapper">
-        <img
-          src={imageSrc}
-          alt={member.image?.altText || member.name}
-          className="team-card-image"
-        />
+        <picture>
+          {webpSrc !== imageSrc ? <source srcSet={webpSrc} type="image/webp" /> : null}
+          <img
+            src={imageSrc}
+            alt={member.image?.altText || member.name}
+            className="team-card-image"
+            loading="lazy"
+            decoding="async"
+          />
+        </picture>
         <div className="team-card-overlay">
           <div className="team-card-social">
             {member.social?.linkedin && (
@@ -67,6 +80,18 @@ const TeamCard = ({ member }) => {
                 <Mail size={20} />
               </a>
             )}
+            {member.social?.github && (
+              <a
+                href={member.social.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="social-link github"
+                title="GitHub"
+                aria-label="GitHub"
+              >
+                <Github size={20} />
+              </a>
+            )}
             {member.social?.portfolio && (
               <a
                 href={member.social.portfolio}
@@ -86,7 +111,21 @@ const TeamCard = ({ member }) => {
       <div className="team-card-content">
         <h3 className="team-card-name">{member.name}</h3>
         <p className="team-card-role">{member.role}</p>
-        {member.bio && <p className="team-card-bio">{member.bio}</p>}
+        {fullBio ? (
+          <>
+            <p className="team-card-bio">{isBioExpanded ? fullBio : bioPreview}</p>
+            {shouldTruncateBio ? (
+              <button
+                type="button"
+                className="team-bio-toggle"
+                onClick={() => setIsBioExpanded((prev) => !prev)}
+                aria-label={isBioExpanded ? 'Show shorter bio' : 'Show full bio'}
+              >
+                {isBioExpanded ? 'Show less' : 'Read full bio'}
+              </button>
+            ) : null}
+          </>
+        ) : null}
       </div>
     </div>
   );

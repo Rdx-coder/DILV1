@@ -6,13 +6,15 @@ import {
   X,
   Upload,
   Linkedin,
+  Github,
   Mail,
   Globe,
   ArrowUp,
   ArrowDown
 } from 'lucide-react';
-import { toast } from '../../components/ui/sonner';
 import { getAuthHeaders } from '../../utils/auth';
+import { withCsrfHeaders } from '../../utils/csrf';
+import { notify } from '../../utils/notify';
 import Sidebar from '../../components/admin/Sidebar';
 
 const AdminTeamManager = () => {
@@ -35,6 +37,7 @@ const AdminTeamManager = () => {
     social: {
       linkedin: '',
       email: '',
+      github: '',
       portfolio: ''
     }
   });
@@ -81,11 +84,11 @@ const AdminTeamManager = () => {
       if (data.success) {
         setTeamMembers(data.data || []);
       } else {
-        toast.error('Failed to load team members');
+        notify.error('Failed to load team members');
       }
     } catch (error) {
       console.error('Error fetching team members:', error);
-      toast.error('Error loading team members');
+      notify.error('Error loading team members');
     } finally {
       setLoading(false);
     }
@@ -131,7 +134,7 @@ const AdminTeamManager = () => {
     }
 
     if (!formData.name.trim() || !formData.role.trim()) {
-      toast.error('Please fill in name and role');
+      notify.error('Please fill in name and role');
       return;
     }
 
@@ -157,25 +160,28 @@ const AdminTeamManager = () => {
 
       const response = await fetch(url, {
         method,
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('adminToken')}`
-        },
+        headers: await withCsrfHeaders(
+          {
+            Authorization: `Bearer ${localStorage.getItem('adminToken')}`
+          },
+          BACKEND_URL
+        ),
         body: form
       });
 
       const data = await response.json();
 
       if (data.success) {
-        toast.success(editingId ? 'Team member updated' : 'Team member created');
+        notify.success(editingId ? 'Team member updated' : 'Team member created');
         setShowForm(false);
         resetForm();
         fetchTeamMembers();
       } else {
-        toast.error(data.message || 'Failed to save team member');
+        notify.error(data.message || 'Failed to save team member');
       }
     } catch (error) {
       console.error('Error saving team member:', error);
-      toast.error('Error saving team member');
+      notify.error('Error saving team member');
     } finally {
       setIsSaving(false);
     }
@@ -184,7 +190,7 @@ const AdminTeamManager = () => {
   const handleEdit = (member) => {
     const social = member.social && typeof member.social === 'object'
       ? member.social
-      : { linkedin: '', email: '', portfolio: '' };
+      : { linkedin: '', email: '', github: '', portfolio: '' };
 
     setFormData({
       name: member.name,
@@ -195,6 +201,7 @@ const AdminTeamManager = () => {
       social: {
         linkedin: social.linkedin || '',
         email: social.email || '',
+        github: social.github || '',
         portfolio: social.portfolio || ''
       }
     });
@@ -209,22 +216,23 @@ const AdminTeamManager = () => {
     }
 
     try {
+      const headers = await withCsrfHeaders(getAuthHeaders(), BACKEND_URL);
       const response = await fetch(`${BACKEND_URL}/api/team/admin/${id}/delete`, {
         method: 'DELETE',
-        headers: getAuthHeaders()
+        headers
       });
 
       const data = await response.json();
 
       if (data.success) {
-        toast.success('Team member deleted');
+        notify.success('Team member deleted');
         fetchTeamMembers();
       } else {
-        toast.error(data.message || 'Failed to delete team member');
+        notify.error(data.message || 'Failed to delete team member');
       }
     } catch (error) {
       console.error('Error deleting team member:', error);
-      toast.error('Error deleting team member');
+      notify.error('Error deleting team member');
     }
   };
 
@@ -234,23 +242,27 @@ const AdminTeamManager = () => {
 
       const response = await fetch(`${BACKEND_URL}/api/team/admin/${member._id}/update`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('adminToken')}`
-        },
+        headers: await withCsrfHeaders(
+          {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('adminToken')}`
+          },
+          BACKEND_URL
+        ),
         body: JSON.stringify({ order: newOrder })
       });
 
       const data = await response.json();
 
       if (data.success) {
+        notify.success('Team member order updated');
         fetchTeamMembers();
       } else {
-        toast.error('Failed to reorder');
+        notify.error('Failed to reorder');
       }
     } catch (error) {
       console.error('Error reordering:', error);
-      toast.error('Error reordering team member');
+      notify.error('Error reordering team member');
     }
   };
 
@@ -264,6 +276,7 @@ const AdminTeamManager = () => {
       social: {
         linkedin: '',
         email: '',
+        github: '',
         portfolio: ''
       }
     });
@@ -315,7 +328,7 @@ const AdminTeamManager = () => {
             <form onSubmit={handleSubmit} className="team-form-content">
               {/* Image Upload */}
               <div className="form-section">
-                <label>Member Photo</label>
+                <label htmlFor="member-photo">Member Photo</label>
                 <div className="image-upload-area">
                   {imagePreview ? (
                     <div className="image-preview-container">
@@ -336,6 +349,7 @@ const AdminTeamManager = () => {
                       <Upload size={32} />
                       <span>Click to upload image</span>
                       <input
+                        id="member-photo"
                         type="file"
                         accept="image/*"
                         onChange={handleImageChange}
@@ -349,8 +363,9 @@ const AdminTeamManager = () => {
               {/* Name & Role */}
               <div className="form-grid-two">
                 <div className="form-section">
-                  <label>Full Name *</label>
+                  <label htmlFor="member-name">Full Name *</label>
                   <input
+                    id="member-name"
                     type="text"
                     name="name"
                     value={formData.name}
@@ -360,8 +375,9 @@ const AdminTeamManager = () => {
                   />
                 </div>
                 <div className="form-section">
-                  <label>Role/Position *</label>
+                  <label htmlFor="member-role">Role/Position *</label>
                   <input
+                    id="member-role"
                     type="text"
                     name="role"
                     value={formData.role}
@@ -374,8 +390,9 @@ const AdminTeamManager = () => {
 
               {/* Bio */}
               <div className="form-section">
-                <label>Bio</label>
+                <label htmlFor="member-bio">Bio</label>
                 <textarea
+                  id="member-bio"
                   name="bio"
                   value={formData.bio}
                   onChange={handleInputChange}
@@ -387,13 +404,14 @@ const AdminTeamManager = () => {
 
               {/* Social Links */}
               <div className="form-section">
-                <label className="section-title">Social Links</label>
+                <p className="section-title">Social Links</p>
                 <div className="form-grid-three">
                   <div>
-                    <label className="sub-label">
+                    <label className="sub-label" htmlFor="member-linkedin">
                       <Linkedin size={14} /> LinkedIn
                     </label>
                     <input
+                      id="member-linkedin"
                       type="url"
                       name="social.linkedin"
                       value={formData.social.linkedin}
@@ -403,10 +421,11 @@ const AdminTeamManager = () => {
                     />
                   </div>
                   <div>
-                    <label className="sub-label">
+                    <label className="sub-label" htmlFor="member-email">
                       <Mail size={14} /> Email
                     </label>
                     <input
+                      id="member-email"
                       type="email"
                       name="social.email"
                       value={formData.social.email}
@@ -416,10 +435,25 @@ const AdminTeamManager = () => {
                     />
                   </div>
                   <div>
-                    <label className="sub-label">
+                    <label className="sub-label" htmlFor="member-github">
+                      <Github size={14} /> GitHub
+                    </label>
+                    <input
+                      id="member-github"
+                      type="url"
+                      name="social.github"
+                      value={formData.social.github}
+                      onChange={handleInputChange}
+                      placeholder="github.com/username"
+                      className="form-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="sub-label" htmlFor="member-portfolio">
                       <Globe size={14} /> Portfolio
                     </label>
                     <input
+                      id="member-portfolio"
                       type="url"
                       name="social.portfolio"
                       value={formData.social.portfolio}
@@ -434,8 +468,9 @@ const AdminTeamManager = () => {
               {/* Order & Status */}
               <div className="form-grid-two">
                 <div className="form-section">
-                  <label>Display Order</label>
+                  <label htmlFor="member-order">Display Order</label>
                   <input
+                    id="member-order"
                     type="number"
                     name="order"
                     value={formData.order}
@@ -444,8 +479,9 @@ const AdminTeamManager = () => {
                   />
                 </div>
                 <div className="form-section">
-                  <label className="checkbox-label">
+                  <label className="checkbox-label" htmlFor="member-active">
                     <input
+                      id="member-active"
                       type="checkbox"
                       name="isActive"
                       checked={formData.isActive}
@@ -483,8 +519,19 @@ const AdminTeamManager = () => {
             {loading ? (
               <div className="loading-state">Loading team members...</div>
             ) : teamMembers.length === 0 ? (
-              <div className="empty-state">
-                <p>No team members yet. Add one to get started!</p>
+              <div className="empty-state-card" role="status">
+                <h3 className="empty-state-title">No team members yet</h3>
+                <p className="empty-state-description">Create your first team profile to publish members on the public Team page.</p>
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => {
+                    resetForm();
+                    setShowForm(true);
+                  }}
+                >
+                  <Plus size={18} /> Add Team Member
+                </button>
               </div>
             ) : (
               <div className="team-items-grid">
@@ -513,6 +560,11 @@ const AdminTeamManager = () => {
                     {member.social?.email && (
                       <a href={`mailto:${member.social.email}`} title="Email">
                         <Mail size={16} />
+                      </a>
+                    )}
+                    {member.social?.github && (
+                      <a href={member.social.github} target="_blank" rel="noopener noreferrer" title="GitHub">
+                        <Github size={16} />
                       </a>
                     )}
                     {member.social?.portfolio && (

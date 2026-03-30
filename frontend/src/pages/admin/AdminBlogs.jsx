@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Pencil, Plus, Trash2, ArrowLeft } from 'lucide-react';
 import { toast } from '../../components/ui/sonner';
 import { getAuthHeaders } from '../../utils/auth';
+import { withCsrfHeaders } from '../../utils/csrf';
 import SEO from '../../components/SEO';
 
 const AdminBlogs = () => {
@@ -45,9 +46,10 @@ const AdminBlogs = () => {
     if (!window.confirm('Delete this blog permanently?')) return;
 
     try {
+      const headers = await withCsrfHeaders(getAuthHeaders(), BACKEND_URL);
       const res = await fetch(`${BACKEND_URL}/api/admin/blog/${id}`, {
         method: 'DELETE',
-        headers: getAuthHeaders()
+        headers
       });
       const data = await res.json();
 
@@ -66,6 +68,12 @@ const AdminBlogs = () => {
     <div className="admin-blog-page">
       <SEO title="Admin Blogs" description="Manage blog posts" />
 
+      <nav className="breadcrumbs" aria-label="Breadcrumb">
+        <Link to="/admin/dashboard">Dashboard</Link>
+        <span className="breadcrumbs-sep">/</span>
+        <span className="breadcrumbs-current">Blogs</span>
+      </nav>
+
       <div className="admin-blog-header">
         <h1>Blog Manager</h1>
         <div className="admin-blog-actions">
@@ -79,9 +87,18 @@ const AdminBlogs = () => {
       </div>
 
       {loading ? (
-        <div className="empty-state">Loading blogs...</div>
+        <div className="empty-state-card" role="status">
+          <h3 className="empty-state-title">Loading blogs...</h3>
+          <p className="empty-state-description">Fetching the latest posts from your admin workspace.</p>
+        </div>
       ) : blogs.length === 0 ? (
-        <div className="empty-state">No blog posts found</div>
+        <div className="empty-state-card" role="status">
+          <h3 className="empty-state-title">No blog posts found</h3>
+          <p className="empty-state-description">Start publishing stories and updates to populate the blog.</p>
+          <Link className="btn-primary" to="/admin/blog/new">
+            <Plus size={16} /> Create First Blog
+          </Link>
+        </div>
       ) : (
         <div className="admin-blog-table-wrap">
           <table className="admin-table">

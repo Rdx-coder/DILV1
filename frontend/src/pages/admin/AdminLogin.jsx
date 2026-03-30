@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
 import { toast } from '../../components/ui/sonner';
+import { withCsrfHeaders } from '../../utils/csrf';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -21,11 +22,15 @@ const AdminLogin = () => {
 
     try {
       const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-      const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: {
+      const headers = await withCsrfHeaders(
+        {
           'Content-Type': 'application/json',
         },
+        BACKEND_URL
+      );
+      const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+        method: 'POST',
+        headers,
         body: JSON.stringify(formData),
       });
 

@@ -20,6 +20,20 @@ const BlogList = () => {
 
   const hasFilter = Boolean(filters.category || filters.tag || filters.search || filters.page > 1);
   const listCanonical = `${window.location.origin}/blog`;
+  const quickTags = useMemo(() => {
+    const counts = new Map();
+    blogs.forEach((item) => {
+      (item.tags || []).forEach((tag) => {
+        const nextCount = (counts.get(tag) || 0) + 1;
+        counts.set(tag, nextCount);
+      });
+    });
+
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([tag]) => tag);
+  }, [blogs]);
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -97,12 +111,14 @@ const BlogList = () => {
           placeholder="Search blog posts..."
           value={filters.search}
           onChange={(e) => updateFilter({ search: e.target.value, page: 1 })}
+                  aria-label="Search blog posts"
         />
 
         <select
           className="form-input"
           value={filters.category}
           onChange={(e) => updateFilter({ category: e.target.value, page: 1 })}
+                  aria-label="Filter blog posts by category"
         >
           <option value="">All Categories</option>
           {categories.map((category) => (
@@ -115,13 +131,71 @@ const BlogList = () => {
           placeholder="Filter by tag"
           value={filters.tag}
           onChange={(e) => updateFilter({ tag: e.target.value, page: 1 })}
+                  aria-label="Filter blog posts by tag"
         />
       </div>
 
+      {(filters.search || filters.category || filters.tag) ? (
+        <div className="active-filter-row" aria-label="Active blog filters">
+          {filters.search ? (
+            <button type="button" className="tag-chip tag-chip-link" onClick={() => updateFilter({ search: '', page: 1 })}>
+              Search: {filters.search} x
+            </button>
+          ) : null}
+          {filters.category ? (
+            <button type="button" className="tag-chip tag-chip-link" onClick={() => updateFilter({ category: '', page: 1 })}>
+              Category: {filters.category} x
+            </button>
+          ) : null}
+          {filters.tag ? (
+            <button type="button" className="tag-chip tag-chip-link" onClick={() => updateFilter({ tag: '', page: 1 })}>
+              Tag: #{filters.tag} x
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
+      {quickTags.length > 0 ? (
+        <div className="blog-quick-tags" aria-label="Popular tags">
+          {quickTags.map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              className="tag-chip tag-chip-link"
+              onClick={() => updateFilter({ tag, page: 1 })}
+            >
+              #{tag}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       {loading ? (
-        <div className="empty-state">Loading blogs...</div>
+        <div className="blog-grid" aria-label="Loading blog posts">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <article key={`blog-skeleton-${index}`} className="blog-card blog-card-skeleton" aria-hidden="true">
+              <div className="blog-card-image skeleton-box"></div>
+              <div className="blog-card-content">
+                <div className="skeleton-line skeleton-subtitle"></div>
+                <div className="skeleton-line skeleton-title"></div>
+                <div className="skeleton-line"></div>
+                <div className="skeleton-line skeleton-short"></div>
+              </div>
+            </article>
+          ))}
+        </div>
       ) : blogs.length === 0 ? (
-        <div className="empty-state">No blogs found for selected filters</div>
+        <div className="empty-state-card" role="status">
+          <h3 className="empty-state-title">No blogs found</h3>
+          <p className="empty-state-description">Try changing your search, category, or tag filters to discover more posts.</p>
+          <button
+            className="btn-secondary"
+            type="button"
+            onClick={() => updateFilter({ page: 1, category: '', tag: '', search: '' })}
+          >
+            Clear Filters
+          </button>
+        </div>
       ) : (
         <div className="blog-grid">
           {blogs.map((blog) => (
@@ -135,6 +209,7 @@ const BlogList = () => {
           className="btn-secondary"
           disabled={meta.page <= 1}
           onClick={() => updateFilter({ page: meta.page - 1 })}
+                  aria-label="Previous page"
         >
           Previous
         </button>
@@ -145,6 +220,7 @@ const BlogList = () => {
           className="btn-secondary"
           disabled={meta.page >= meta.pages}
           onClick={() => updateFilter({ page: meta.page + 1 })}
+                  aria-label="Next page"
         >
           Next
         </button>

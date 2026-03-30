@@ -28,6 +28,34 @@ const parseOrder = (value, defaultValue = 0) => {
   return Number.isNaN(parsed) ? defaultValue : parsed;
 };
 
+const isTransactionUnsupportedError = (error) => {
+  const message = String(error?.message || '');
+  return (
+    message.includes('Transaction numbers are only allowed') ||
+    message.includes('replica set') ||
+    message.includes('standalone')
+  );
+};
+
+const withOptionalTransaction = async (operation) => {
+  const session = await TeamMember.startSession();
+  try {
+    let result;
+    await session.withTransaction(async () => {
+      result = await operation(session);
+    });
+    return result;
+  } catch (error) {
+    if (!isTransactionUnsupportedError(error)) {
+      throw error;
+    }
+    // Fallback for standalone MongoDB deployments where transactions are unavailable.
+    return operation(null);
+  } finally {
+    await session.endSession();
+  }
+};
+
 const getRequestBaseUrl = (req) => {
   const forwardedProto = req.headers['x-forwarded-proto'];
   const protocol = (typeof forwardedProto === 'string' && forwardedProto.length > 0)
@@ -196,7 +224,13 @@ exports.createTeamMember = async (req, res) => {
       });
     }
 
-    const member = await TeamMember.create(memberData);
+    const member = await withOptionalTransaction(async (session) => {
+      if (session) {
+        const docs = await TeamMember.create([memberData], { session });
+        return docs[0];
+      }
+      return TeamMember.create(memberData);
+    });
 
     res.status(201).json({
       success: true,
@@ -248,23 +282,37 @@ exports.updateTeamMember = async (req, res) => {
           console.error('Error deleting old file:', err);
         }
       }
-
-      member.image = {
-        filename: req.file.filename,
-        url: `/uploads/team/${req.file.filename}`,
-        altText: name || member.name || 'Team member'
-      };
     }
 
-    // Update fields
-    if (name) member.name = name;
-    if (role) member.role = role;
-    if (bio !== undefined) member.bio = bio;
-    if (social !== undefined) member.social = parseSocial(social);
-    if (order !== undefined) member.order = parseOrder(order, member.order);
-    if (isActive !== undefined) member.isActive = parseBoolean(isActive, member.isActive);
+    member = await withOptionalTransaction(async (session) => {
+      const doc = session
+        ? await TeamMember.findById(id).session(session)
+        : await TeamMember.findById(id);
 
-    member = await member.save();
+      if (!doc) {
+        const notFoundError = new Error('Team member not found');
+        notFoundError.statusCode = 404;
+        throw notFoundError;
+      }
+
+      if (req.file) {
+        doc.image = {
+          filename: req.file.filename,
+          url: `/uploads/team/${req.file.filename}`,
+          altText: name || doc.name || 'Team member'
+        };
+      }
+
+      if (name) doc.name = name;
+      if (role) doc.role = role;
+      if (bio !== undefined) doc.bio = bio;
+      if (social !== undefined) doc.social = parseSocial(social);
+      if (order !== undefined) doc.order = parseOrder(order, doc.order);
+      if (isActive !== undefined) doc.isActive = parseBoolean(isActive, doc.isActive);
+
+      await doc.save({ session: session || undefined });
+      return doc;
+    });
 
     res.status(200).json({
       success: true,
@@ -314,7 +362,13 @@ exports.deleteTeamMember = async (req, res) => {
       }
     }
 
-    await TeamMember.deleteOne({ _id: id });
+    await withOptionalTransaction(async (session) => {
+      if (session) {
+        await TeamMember.deleteOne({ _id: id }, { session });
+        return;
+      }
+      await TeamMember.deleteOne({ _id: id });
+    });
 
     res.status(200).json({
       success: true,

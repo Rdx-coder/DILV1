@@ -44,6 +44,36 @@ function normalizeTags(input) {
   return [];
 }
 
+function escapeXml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function createOgImageSvg(blog) {
+  const title = String(blog.seoTitle || blog.title || 'Dangi Innovation Lab').slice(0, 86);
+  const category = String(blog.category || 'Blog').slice(0, 42);
+  const dateText = blog.createdAt ? new Date(blog.createdAt).toLocaleDateString() : '';
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a1c1b"/>
+      <stop offset="100%" stop-color="#2c3316"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="72" y="72" width="1056" height="486" rx="24" fill="rgba(0,0,0,0.22)" stroke="rgba(217,251,6,0.28)"/>
+  <text x="96" y="166" fill="#d9fb06" font-family="Arial, sans-serif" font-size="36" font-weight="700">Dangi Innovation Lab</text>
+  <text x="96" y="245" fill="#f6f8ee" font-family="Arial, sans-serif" font-size="54" font-weight="700">${escapeXml(title)}</text>
+  <text x="96" y="525" fill="#d4dcc4" font-family="Arial, sans-serif" font-size="30">${escapeXml(category)}${dateText ? ` • ${escapeXml(dateText)}` : ''}</text>
+</svg>`;
+}
+
 function buildBlogPayload(req) {
   const payload = {
     ...req.body
@@ -359,6 +389,8 @@ exports.getPublishedBlogs = async (req, res) => {
       Blog.distinct('category', { status: 'published' })
     ]);
 
+    const hostBase = `${req.protocol}://${req.get('host')}`;
+
     return res.status(200).json({
       success: true,
       count: blogs.length,
@@ -366,7 +398,13 @@ exports.getPublishedBlogs = async (req, res) => {
       page: parseInt(page, 10),
       pages: Math.ceil(total / parseInt(limit, 10)),
       categories,
-      blogs: blogs.map(serializeBlog)
+      blogs: blogs.map((blog) => {
+        const serialized = serializeBlog(blog);
+        return {
+          ...serialized,
+          ogImageUrl: `${hostBase}/api/blog/${serialized.slug}/og-image.svg`
+        };
+      })
     });
   } catch (error) {
     console.error('Get published blogs error:', error);
@@ -406,16 +444,58 @@ exports.getBlogBySlug = async (req, res) => {
       .limit(3)
       .select('title slug excerpt coverImage category createdAt author tags');
 
+    const hostBase = `${req.protocol}://${req.get('host')}`;
+    const serializedBlog = serializeBlog(blog);
+
     return res.status(200).json({
       success: true,
-      blog: serializeBlog(blog),
-      relatedPosts: relatedPosts.map(serializeBlog)
+      blog: {
+        ...serializedBlog,
+        ogImageUrl: `${hostBase}/api/blog/${serializedBlog.slug}/og-image.svg`
+      },
+      relatedPosts: relatedPosts.map((item) => {
+        const serialized = serializeBlog(item);
+        return {
+          ...serialized,
+          ogImageUrl: `${hostBase}/api/blog/${serialized.slug}/og-image.svg`
+        };
+      })
     });
   } catch (error) {
     console.error('Get blog by slug error:', error);
     return res.status(500).json({
       success: false,
       message: 'Server error while fetching blog details'
+    });
+  }
+};
+
+// @desc    Generate dynamic OG image for blog
+// @route   GET /api/blog/:slug/og-image.svg
+// @access  Public
+exports.getBlogOgImage = async (req, res) => {
+  try {
+    const blog = await Blog.findOne({
+      slug: req.params.slug,
+      status: 'published'
+    }).select('title seoTitle category createdAt');
+
+    if (!blog) {
+      return res.status(404).json({
+        success: false,
+        message: 'Blog not found'
+      });
+    }
+
+    const svg = createOgImageSvg(blog);
+    res.set('Content-Type', 'image/svg+xml');
+    res.set('Cache-Control', 'public, max-age=3600');
+    return res.status(200).send(svg);
+  } catch (error) {
+    console.error('Get blog OG image error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while generating OG image'
     });
   }
 };

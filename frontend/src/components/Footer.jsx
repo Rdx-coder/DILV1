@@ -1,8 +1,52 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Linkedin, Twitter } from 'lucide-react';
+import { Mail, Linkedin, Twitter, Facebook } from 'lucide-react';
+import { withCsrfHeaders } from '../utils/csrf';
+import { notify } from '../utils/notify';
 
 const Footer = () => {
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+
+  const handleNewsletterSubmit = async (event) => {
+    event.preventDefault();
+    const email = newsletterEmail.trim();
+
+    if (!email) {
+      notify.error('Please enter your email.');
+      return;
+    }
+
+    try {
+      setIsSubscribing(true);
+      const headers = await withCsrfHeaders(
+        {
+          'Content-Type': 'application/json'
+        },
+        BACKEND_URL
+      );
+
+      const response = await fetch(`${BACKEND_URL}/api/newsletter`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        notify.success(data.message || 'Subscribed successfully!');
+        setNewsletterEmail('');
+      } else {
+        notify.error(data.message || 'Could not subscribe right now.');
+      }
+    } catch (_error) {
+      notify.error('Could not subscribe right now.');
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
+
   return (
     <footer className="footer-container">
       <div className="footer-content">
@@ -17,6 +61,9 @@ const Footer = () => {
               <a href="mailto:contact@dangiinnovationlab.com" className="social-link" aria-label="Email">
                 <Mail size={20} />
               </a>
+              <a href="#" className="social-link" aria-label="Facebook">
+                <Facebook size={20} />
+              </a>
               <a href="#" className="social-link" aria-label="LinkedIn">
                 <Linkedin size={20} />
               </a>
@@ -24,6 +71,7 @@ const Footer = () => {
                 <Twitter size={20} />
               </a>
             </div>
+            <p className="footer-follow-cta">Follow us for updates and stories</p>
           </div>
 
           {/* Quick Links */}
@@ -59,6 +107,24 @@ const Footer = () => {
                 contact@dangiinnovationlab.com
               </a>
             </p>
+
+            <form className="footer-newsletter" onSubmit={handleNewsletterSubmit}>
+              <label htmlFor="footer-newsletter-email" className="footer-subheading">Newsletter</label>
+              <div className="footer-newsletter-row">
+                <input
+                  id="footer-newsletter-email"
+                  type="email"
+                  className="footer-newsletter-input"
+                  placeholder="you@example.com"
+                  value={newsletterEmail}
+                  onChange={(event) => setNewsletterEmail(event.target.value)}
+                  required
+                />
+                <button type="submit" className="btn-primary footer-newsletter-btn" disabled={isSubscribing}>
+                  {isSubscribing ? 'Joining...' : 'Join'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
 

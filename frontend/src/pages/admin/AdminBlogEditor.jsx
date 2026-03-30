@@ -4,6 +4,7 @@ import { ArrowLeft, Eye } from 'lucide-react';
 import slugify from 'slugify';
 import { toast } from '../../components/ui/sonner';
 import { getAuthHeaders, getToken } from '../../utils/auth';
+import { withCsrfHeaders } from '../../utils/csrf';
 import SEO from '../../components/SEO';
 import BlogEditor from '../../components/blog/BlogEditor';
 
@@ -173,35 +174,47 @@ const AdminBlogEditor = () => {
       setSaving(true);
 
       let res;
-      if (imageFile) {
-        const formData = new FormData();
-        formData.append('title', payload.title);
-        formData.append('slug', payload.slug);
-        formData.append('content', payload.content);
-        formData.append('excerpt', payload.excerpt || '');
-        formData.append('category', payload.category);
-        formData.append('author', payload.author || '');
-        formData.append('status', payload.status || 'draft');
-        formData.append('seoTitle', payload.seoTitle || '');
-        formData.append('seoDescription', payload.seoDescription || '');
-        formData.append('tags', JSON.stringify(payload.tags || []));
-        formData.append('coverImageUrl', payload.coverImage || '');
-        formData.append('coverImageAlt', payload.coverImageAlt || '');
-        formData.append('coverImageFile', imageFile);
+      try {
+        if (imageFile) {
+          const formData = new FormData();
+          formData.append('title', payload.title);
+          formData.append('slug', payload.slug);
+          formData.append('content', payload.content);
+          formData.append('excerpt', payload.excerpt || '');
+          formData.append('category', payload.category);
+          formData.append('author', payload.author || '');
+          formData.append('status', payload.status || 'draft');
+          formData.append('seoTitle', payload.seoTitle || '');
+          formData.append('seoDescription', payload.seoDescription || '');
+          formData.append('tags', JSON.stringify(payload.tags || []));
+          formData.append('coverImageUrl', payload.coverImage || '');
+          formData.append('coverImageAlt', payload.coverImageAlt || '');
+          formData.append('coverImageFile', imageFile);
 
-        res = await fetch(endpoint, {
-          method: isEdit ? 'PUT' : 'POST',
-          headers: {
-            Authorization: `Bearer ${getToken()}`
-          },
-          body: formData
-        });
-      } else {
-        res = await fetch(endpoint, {
-          method: isEdit ? 'PUT' : 'POST',
-          headers: getAuthHeaders(),
-          body: JSON.stringify(payload)
-        });
+          const headers = await withCsrfHeaders(
+            {
+              Authorization: `Bearer ${getToken()}`
+            },
+            BACKEND_URL
+          );
+
+          res = await fetch(endpoint, {
+            method: isEdit ? 'PUT' : 'POST',
+            headers,
+            body: formData
+          });
+        } else {
+          const headers = await withCsrfHeaders(getAuthHeaders(), BACKEND_URL);
+          res = await fetch(endpoint, {
+            method: isEdit ? 'PUT' : 'POST',
+            headers,
+            body: JSON.stringify(payload)
+          });
+        }
+      } catch (csrfError) {
+        console.error('[BLOG_SUBMIT] CSRF error:', csrfError);
+        toast.error(`Security error: ${csrfError.message}. Please refresh and try again.`);
+        return;
       }
 
       const raw = await res.text();
@@ -218,6 +231,11 @@ const AdminBlogEditor = () => {
       if (res.status === 401) {
         toast.error('Session expired. Please login again.');
         navigate('/admin/login');
+        return;
+      }
+
+      if (res.status === 403) {
+        toast.error('Security verification failed. Please refresh the page and try again.');
         return;
       }
 
@@ -241,6 +259,14 @@ const AdminBlogEditor = () => {
   return (
     <div className="admin-blog-editor-page">
       <SEO title={isEdit ? 'Edit Blog' : 'Create Blog'} description="Admin blog editor" />
+
+      <nav className="breadcrumbs" aria-label="Breadcrumb">
+        <Link to="/admin/dashboard">Dashboard</Link>
+        <span className="breadcrumbs-sep">/</span>
+        <Link to="/admin/blogs">Blogs</Link>
+        <span className="breadcrumbs-sep">/</span>
+        <span className="breadcrumbs-current">{isEdit ? 'Edit' : 'Create'}</span>
+      </nav>
 
       <div className="admin-blog-header">
         <h1>{isEdit ? 'Edit Blog' : 'Create Blog'}</h1>
@@ -326,13 +352,19 @@ const AdminBlogEditor = () => {
 
           <div className="form-group">
             <label className="form-label">Category</label>
-            <input
+            <select
               className="form-input"
               name="category"
               value={form.category}
               onChange={handleFieldChange}
               required
-            />
+            >
+              <option value="">Select Category</option>
+              <option value="general">General</option>
+              <option value="success-story">Success Story</option>
+              <option value="tutorial">Tutorial</option>
+              <option value="announcement">Announcement</option>
+            </select>
           </div>
 
           <div className="form-group">
