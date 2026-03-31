@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Linkedin, Twitter, Facebook } from 'lucide-react';
+import { Mail, Linkedin, Twitter, Facebook, Youtube } from 'lucide-react';
 import { withCsrfHeaders } from '../utils/csrf';
 import { notify } from '../utils/notify';
 
@@ -69,6 +69,9 @@ const Footer = () => {
               </a>
               <a href="#" className="social-link" aria-label="Twitter">
                 <Twitter size={20} />
+              </a>
+              <a href="#" className="social-link" aria-label="YouTube">
+                <Youtube size={20} />
               </a>
             </div>
             <p className="footer-follow-cta">Follow us for updates and stories</p>

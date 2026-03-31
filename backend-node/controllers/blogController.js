@@ -14,6 +14,7 @@ function serializeBlog(blogDoc) {
   const blog = blogDoc.toObject ? blogDoc.toObject() : blogDoc;
   return {
     ...blog,
+    coverImage: blog.coverImage && String(blog.coverImage).trim() ? blog.coverImage : null,
     readingTime: getReadingTime(blog.content)
   };
 }

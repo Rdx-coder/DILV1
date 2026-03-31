@@ -78,12 +78,13 @@ const Header = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="desktop-nav">
+        <nav className="desktop-nav" aria-label="Primary navigation">
           {navLinks.map((link) => (
             <Link
               key={link.path}
               to={link.path}
               className={`nav-link ${location.pathname === link.path ? 'active' : ''}`}
+              aria-current={location.pathname === link.path ? 'page' : undefined}
             >
               {link.label}
             </Link>
@@ -98,6 +99,12 @@ const Header = () => {
             onBlurCapture={(event) => {
               if (!event.currentTarget.contains(event.relatedTarget)) {
                 setIsAboutDropdownOpen(false);
+              }
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') {
+                setIsAboutDropdownOpen(false);
+                event.currentTarget.querySelector('.dropdown-toggle')?.focus();
               }
             }}
           >
@@ -152,12 +159,13 @@ const Header = () => {
       </div>
 
       {/* Mobile Navigation */}
-      <nav id="mobile-nav" className={`mobile-nav ${isMenuOpen ? 'is-open' : ''}`} aria-hidden={!isMenuOpen}>
+      <nav id="mobile-nav" className={`mobile-nav ${isMenuOpen ? 'is-open' : ''}`} aria-hidden={!isMenuOpen} aria-label="Mobile navigation">
           {navLinks.map((link) => (
             <Link
               key={link.path}
               to={link.path}
               className={`mobile-nav-link ${location.pathname === link.path ? 'active' : ''}`}
+              aria-current={location.pathname === link.path ? 'page' : undefined}
               onClick={() => {
                 setIsMenuOpen(false);
                 setIsAboutDropdownOpen(false);

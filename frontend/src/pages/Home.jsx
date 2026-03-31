@@ -5,6 +5,9 @@ import { mockData } from '../mock';
 
 const Home = () => {
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+  const blogImageFallback = `data:image/svg+xml;utf8,${encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2c3316"/><stop offset="100%" stop-color="#1a1c1b"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#g)"/><text x="50%" y="48%" dominant-baseline="middle" text-anchor="middle" fill="#d9fb06" font-size="52" font-family="Arial, sans-serif">Dangi Innovation Lab</text><text x="50%" y="58%" dominant-baseline="middle" text-anchor="middle" fill="#f3f8df" font-size="28" font-family="Arial, sans-serif">Blog Update</text></svg>'
+  )}`;
   const [latestBlogs, setLatestBlogs] = useState([]);
   const [successStories, setSuccessStories] = useState([]);
 
@@ -415,23 +418,19 @@ const Home = () => {
             <div className="home-latest-blog-grid">
               {latestBlogs.map((blog) => (
                 <article key={blog._id} className="home-latest-blog-card">
-                  {blog.coverImage ? (
-                    <Link to={`/blog/${blog.slug}`}>
-                      <picture>
-                        <source
-                          srcSet={blog.coverImage.replace(/\.(jpe?g|png)(\?.*)?$/i, '.webp$2')}
-                          type="image/webp"
-                        />
-                        <img
-                          src={blog.coverImage}
-                          alt={blog.coverImageAlt || blog.title}
-                          className="home-latest-blog-image"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </picture>
-                    </Link>
-                  ) : null}
+                  <Link to={`/blog/${blog.slug}`}>
+                    <img
+                      src={blog.coverImage || blogImageFallback}
+                      alt={blog.coverImageAlt || blog.title}
+                      className="home-latest-blog-image"
+                      loading="lazy"
+                      decoding="async"
+                      onError={(event) => {
+                        event.currentTarget.onerror = null;
+                        event.currentTarget.src = blogImageFallback;
+                      }}
+                    />
+                  </Link>
                   <div className="home-latest-blog-content">
                     <p className="home-latest-blog-meta">
                       <span>{blog.category}</span>

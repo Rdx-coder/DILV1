@@ -10,6 +10,7 @@ import FloatingContactButton from "./components/FloatingContactButton";
 import Analytics from "./components/Analytics";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { logClientError } from "./utils/errorLogger";
+import useScrollToTop from "./hooks/useScrollToTop";
 
 const Home = lazy(() => import("./pages/Home"));
 const About = lazy(() => import("./pages/About"));
@@ -27,6 +28,11 @@ const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminBlogs = lazy(() => import("./pages/admin/AdminBlogs"));
 const AdminBlogEditor = lazy(() => import("./pages/admin/AdminBlogEditor"));
 const AdminTeamManager = lazy(() => import("./pages/admin/AdminTeamManager"));
+
+const RouterScrollManager = () => {
+  useScrollToTop();
+  return null;
+};
 
 function App() {
   useEffect(() => {
@@ -59,6 +65,7 @@ function App() {
   return (
     <div className="App">
       <BrowserRouter>
+        <RouterScrollManager />
         <ErrorBoundary>
           <RouteSEO />
           <Analytics />
