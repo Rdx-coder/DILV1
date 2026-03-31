@@ -1434,23 +1434,28 @@ textarea:focus-visible {
 }
 
 .tag-chip {
-  background: rgba(217, 251, 6, 0.12);
-  color: var(--brand-primary);
-  border: 1px solid var(--border-light);
+  background: linear-gradient(180deg, rgba(217, 251, 6, 0.14), rgba(217, 251, 6, 0.07));
+  color: #ecf6b8;
+  border: 1px solid rgba(217, 251, 6, 0.26);
   border-radius: 999px;
-  padding: 2px 10px;
-  font-size: 12px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
 }
 
 .tag-chip-link {
   text-decoration: none;
   cursor: pointer;
-  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+  transition: border-color 0.22s ease, color 0.22s ease, background-color 0.22s ease, transform 0.22s ease;
 }
 
 .tag-chip-link:hover {
-  border-color: var(--brand-primary);
-  background: rgba(217, 251, 6, 0.2);
+  border-color: #efff9f;
+  color: #11150e;
+  background: #efff9f;
+  transform: translateY(-1px);
 }
 
 .active-filter-row,
@@ -1464,6 +1469,20 @@ textarea:focus-visible {
 .active-filter-row,
 .blog-quick-tags {
   margin-top: 12px;
+}
+
+.active-filter-row .tag-chip,
+.blog-quick-tags .tag-chip {
+  color: var(--brand-primary);
+  background: rgba(217, 251, 6, 0.1);
+  border-color: var(--border-light);
+}
+
+.blog-card-tag {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .blog-detail-tags {

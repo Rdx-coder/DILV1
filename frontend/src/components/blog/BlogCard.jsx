@@ -23,6 +23,11 @@ const BlogCard = ({ blog }) => {
     )}`;
 
     const imageSrc = blog.coverImage || thumbnailFallback;
+    const formatTag = (tag) => {
+      const value = String(tag || '').trim();
+      if (!value) return '';
+      return value.length > 18 ? `${value.slice(0, 18)}...` : value;
+    };
 
   return (
     <article className="blog-card">
@@ -54,10 +59,11 @@ const BlogCard = ({ blog }) => {
             <Link
               key={tag}
               to={`/blog?tag=${encodeURIComponent(tag)}`}
-              className="tag-chip tag-chip-link"
+              className="tag-chip tag-chip-link blog-card-tag"
               aria-label={`Filter posts by tag ${tag}`}
+              title={`#${tag}`}
             >
-              #{tag}
+              #{formatTag(tag)}
             </Link>
           ))}
         </div>
