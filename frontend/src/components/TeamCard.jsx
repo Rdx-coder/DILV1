@@ -36,7 +36,6 @@ const TeamCard = ({ member }) => {
   };
 
   const imageSrc = resolveImageUrl(member.image?.url);
-  const webpSrc = imageSrc.replace(/\.(jpe?g|png)(\?.*)?$/i, '.webp$2');
   const fullBio = String(member.bio || '').trim();
   const shouldTruncateBio = fullBio.length > 150;
   const bioPreview = useMemo(() => {
@@ -47,16 +46,13 @@ const TeamCard = ({ member }) => {
   return (
     <div className="team-card">
       <div className="team-card-image-wrapper">
-        <picture>
-          {webpSrc !== imageSrc ? <source srcSet={webpSrc} type="image/webp" /> : null}
-          <img
-            src={imageSrc}
-            alt={member.image?.altText || member.name}
-            className="team-card-image"
-            loading="lazy"
-            decoding="async"
-          />
-        </picture>
+        <img
+          src={imageSrc}
+          alt={member.image?.altText || member.name}
+          className="team-card-image"
+          loading="lazy"
+          decoding="async"
+        />
         <div className="team-card-overlay">
           <div className="team-card-social">
             {member.social?.linkedin && (
