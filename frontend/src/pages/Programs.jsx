@@ -2,8 +2,68 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Rocket, GraduationCap, Microscope, Code, Users, ArrowRight, CheckCircle, Clock, Target } from 'lucide-react';
 import { mockData } from '../mock';
+import SEO from '../components/SEO';
 
 const Programs = () => {
+  const pageUrl = `${window.location.origin}/programs`;
+  const upcomingEvents = [
+    {
+      title: 'Cohort 2026 Application Window',
+      date: 'Jan 10 - Feb 20, 2026',
+      type: 'Application',
+      details: 'Submit your track preference, goals, and motivation statement.'
+    },
+    {
+      title: 'Mentor Office Hours',
+      date: 'Feb 8, 2026',
+      type: 'Mentorship',
+      details: 'Live Q&A with alumni mentors on program selection and preparation.'
+    },
+    {
+      title: 'Innovation Sprint Kickoff',
+      date: 'Mar 3, 2026',
+      type: 'Workshop',
+      details: 'A guided workshop to convert community problems into startup-ready ideas.'
+    },
+    {
+      title: 'Scholarship Readiness Webinar',
+      date: 'Mar 18, 2026',
+      type: 'Webinar',
+      details: 'Practical strategies for scholarship essays, recommendations, and interviews.'
+    }
+  ];
+
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: 'Who can apply for DIL programs?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Members of underserved communities are prioritized. Applicants should be 16+ and committed to the 6-month learning cycle.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'How long does a program cycle run?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'DIL programs follow a structured 6-month cycle with mentorship, learning modules, and milestone-based progress reviews.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'What support is provided during the program?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Participants receive mentorship, personalized roadmaps, curated learning resources, and community support.'
+        }
+      }
+    ]
+  };
+
   const iconMap = {
     Rocket: Rocket,
     GraduationCap: GraduationCap,
@@ -14,6 +74,14 @@ const Programs = () => {
 
   return (
     <div className="page-container">
+      <SEO
+        title="Programs | Dangi Innovation Lab"
+        description="Explore Dangi Innovation Lab programs, structured 6-month innovation cycles, and community-first learning tracks."
+        url={pageUrl}
+        canonical={pageUrl}
+        jsonLd={faqJsonLd}
+      />
+
       {/* Page Header */}
       <section className="page-header">
         <div className="container">
@@ -104,7 +172,7 @@ const Programs = () => {
               <Target size={32} className="eligibility-icon" />
               <h3 className="eligibility-title">Primary Eligibility</h3>
               <ul className="eligibility-list">
-                <li>Members of the Dangi community (priority)</li>
+                <li>Members of underserved communities (priority)</li>
                 <li>Age 16 and above</li>
                 <li>Committed to 6-month program duration</li>
                 <li>Access to internet and basic computer skills</li>
@@ -115,8 +183,8 @@ const Programs = () => {
               <Users size={32} className="eligibility-icon" />
               <h3 className="eligibility-title">Community-Priority Policy</h3>
               <p className="eligibility-text">
-                DIL prioritizes members of the Dangi community in all program selections. We believe in 
-                strengthening our community first while remaining open to collaboration with like-minded 
+                DIL prioritizes members of underserved communities in all program selections. We believe in 
+                strengthening community opportunity first while remaining open to collaboration with like-minded 
                 individuals who share our values.
               </p>
               <p className="eligibility-text">
@@ -169,6 +237,29 @@ const Programs = () => {
                 Lifetime access to our alumni network and community of innovators
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Event Calendar */}
+      <section className="event-calendar-section">
+        <div className="container">
+          <div className="event-calendar-header">
+            <h2 className="section-title-center">Upcoming Events & Deadlines</h2>
+            <p className="event-calendar-subtitle">
+              Keep track of applications, workshops, and live sessions for the next cycle.
+            </p>
+          </div>
+
+          <div className="event-calendar-grid">
+            {upcomingEvents.map((eventItem) => (
+              <article key={eventItem.title} className="event-card">
+                <p className="event-type">{eventItem.type}</p>
+                <h3 className="event-title">{eventItem.title}</h3>
+                <p className="event-date">{eventItem.date}</p>
+                <p className="event-details">{eventItem.details}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>

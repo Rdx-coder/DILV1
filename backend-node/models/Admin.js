@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+function isStrongPassword(value = '') {
+  // Minimum 12 chars with uppercase, lowercase, digit, and special character.
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{12,}$/.test(String(value));
+}
+
 const adminSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -11,7 +16,14 @@ const adminSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true
+    required: true,
+    validate: {
+      validator: function(value) {
+        if (!this.isModified('password')) return true;
+        return isStrongPassword(value);
+      },
+      message: 'Password must be at least 12 characters and include uppercase, lowercase, number, and special character.'
+    }
   },
   name: {
     type: String,
@@ -42,4 +54,7 @@ adminSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-module.exports = mongoose.model('Admin', adminSchema);
+const Admin = mongoose.model('Admin', adminSchema);
+Admin.isStrongPassword = isStrongPassword;
+
+module.exports = Admin;

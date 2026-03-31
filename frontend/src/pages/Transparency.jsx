@@ -243,7 +243,7 @@ const Transparency = () => {
               aspect of DIL, please don't hesitate to reach out. Transparency means being accessible and 
               responsive to community inquiries.
             </p>
-            <a href="mailto:transparency@dangiinnovationlab.org" className="btn-primary">
+            <a href="mailto:transparency@dangiinnovationlab.com" className="btn-primary">
               Contact Us About Transparency
             </a>
           </div>

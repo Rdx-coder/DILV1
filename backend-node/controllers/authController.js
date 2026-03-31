@@ -92,6 +92,13 @@ exports.initializeAdmin = async (req, res) => {
       });
     }
 
+    if (!Admin.isStrongPassword(process.env.ADMIN_PASSWORD)) {
+      return res.status(400).json({
+        success: false,
+        message: 'ADMIN_PASSWORD is too weak. Use 12+ chars with uppercase, lowercase, number, and special character.'
+      });
+    }
+
     const admin = await Admin.create({
       email: process.env.ADMIN_EMAIL,
       password: process.env.ADMIN_PASSWORD,

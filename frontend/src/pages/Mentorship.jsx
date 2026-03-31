@@ -2,10 +2,52 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { UserCheck, Globe, TrendingUp, Heart, MessageCircle, ArrowRight } from 'lucide-react';
 import { mockData } from '../mock';
+import SEO from '../components/SEO';
 
 const Mentorship = () => {
+  const pageUrl = `${window.location.origin}/mentorship`;
+
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: 'How does mentorship work at DIL?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Mentors provide one-on-one guidance, progress reviews, and practical advice throughout the 6-month program cycle.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'Can professionals volunteer as mentors?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes. Experienced professionals can apply to mentor by dedicating a few hours per month and supporting community growth.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'Does DIL prioritize underserved communities?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes. DIL follows a community-priority model, ensuring underserved communities receive primary focus in opportunities and support.'
+        }
+      }
+    ]
+  };
+
   return (
     <div className="page-container">
+      <SEO
+        title="Mentorship | Dangi Innovation Lab"
+        description="Learn how Dangi Innovation Lab mentorship and community collaboration help participants grow with expert guidance."
+        url={pageUrl}
+        canonical={pageUrl}
+        jsonLd={faqJsonLd}
+      />
+
       {/* Page Header */}
       <section className="page-header">
         <div className="container">
@@ -86,7 +128,7 @@ const Mentorship = () => {
               <Globe size={32} className="collaboration-icon" />
               <h3 className="collaboration-title">Global Network</h3>
               <p className="collaboration-text">
-                Connect with Dangi community members and allies worldwide, creating a support system 
+                Connect with members of underserved communities and allies worldwide, creating a support system 
                 that transcends geographical boundaries.
               </p>
             </div>
@@ -124,7 +166,7 @@ const Mentorship = () => {
                 <div>
                   <h4 className="principle-title">Community First</h4>
                   <p className="principle-text">
-                    Members of the Dangi community receive priority in program selection and resource allocation
+                    Members of underserved communities receive priority in program selection and resource allocation
                   </p>
                 </div>
               </div>

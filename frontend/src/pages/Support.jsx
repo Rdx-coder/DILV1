@@ -10,7 +10,7 @@ const Support = () => {
         <div className="container">
           <h1 className="page-title">Support Our Mission</h1>
           <p className="page-subtitle">
-            Help us empower the next generation of innovators and leaders from the Dangi community
+            Help us empower the next generation of innovators and leaders from underserved communities
           </p>
         </div>
       </section>
