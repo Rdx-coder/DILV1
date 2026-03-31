@@ -157,19 +157,13 @@ const BlogDetail = () => {
       </header>
 
       {blog.coverImage ? (
-        <picture>
-          <source
-            srcSet={blog.coverImage.replace(/\.(jpe?g|png)(\?.*)?$/i, '.webp$2')}
-            type="image/webp"
-          />
-          <img
-            src={blog.coverImage}
-            alt={blog.coverImageAlt || blog.title}
-            className="blog-detail-cover"
-            loading="lazy"
-            decoding="async"
-          />
-        </picture>
+        <img
+          src={blog.coverImage}
+          alt={blog.coverImageAlt || blog.title}
+          className="blog-detail-cover"
+          loading="lazy"
+          decoding="async"
+        />
       ) : null}
 
       <div className="blog-share-row">
@@ -218,18 +212,12 @@ const BlogDetail = () => {
             {relatedPosts.map((item) => (
               <Link key={item._id} to={`/blog/${item.slug}`} className="related-card">
                 {item.coverImage ? (
-                  <picture>
-                    <source
-                      srcSet={item.coverImage.replace(/\.(jpe?g|png)(\?.*)?$/i, '.webp$2')}
-                      type="image/webp"
-                    />
-                    <img
-                      src={item.coverImage}
-                      alt={item.coverImageAlt || item.title}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </picture>
+                  <img
+                    src={item.coverImage}
+                    alt={item.coverImageAlt || item.title}
+                    loading="lazy"
+                    decoding="async"
+                  />
                 ) : null}
                 <div>
                   <p>{item.category}</p>
