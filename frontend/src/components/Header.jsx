@@ -29,6 +29,11 @@ const Header = () => {
   }, [theme]);
 
   useEffect(() => {
+    setIsMenuOpen(false);
+    setIsAboutDropdownOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
     document.body.style.overflow = isMenuOpen ? 'hidden' : '';
 
     const onEscape = (event) => {

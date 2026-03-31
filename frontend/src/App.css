@@ -4800,3 +4800,63 @@ button.tag-chip-link {
 .footer-email:hover {
   color: #efff9f !important;
 }
+
+/* Light theme corrections: prevent dark-mode contrast overrides from washing out text */
+:root[data-theme='light'] .hero-cta-secondary,
+:root[data-theme='light'] .testimonials-cta,
+:root[data-theme='light'] .btn-secondary {
+  color: #31401f !important;
+  border-color: #6f7d1d !important;
+  background-color: transparent !important;
+}
+
+:root[data-theme='light'] .hero-cta-secondary:hover,
+:root[data-theme='light'] .testimonials-cta:hover,
+:root[data-theme='light'] .btn-secondary:hover {
+  color: #ffffff !important;
+  background-color: #6f7d1d !important;
+  border-color: #6f7d1d !important;
+}
+
+:root[data-theme='light'] .how-number {
+  color: #30401d !important;
+  background-color: #e8edd9 !important;
+  border-color: #6f7d1d !important;
+}
+
+:root[data-theme='light'] .footer-container,
+:root[data-theme='light'] .footer-text,
+:root[data-theme='light'] .footer-follow-cta,
+:root[data-theme='light'] .footer-copyright,
+:root[data-theme='light'] .footer-nonprofit,
+:root[data-theme='light'] .footer-email,
+:root[data-theme='light'] .footer-links a {
+  color: #26311b !important;
+}
+
+:root[data-theme='light'] .footer-links a:hover,
+:root[data-theme='light'] .footer-email:hover {
+  color: #4c5e23 !important;
+}
+
+/* Mobile menu/dropdown fixes: avoid clipping and overlap for About dropdown */
+@media (max-width: 1024px) {
+  .mobile-nav.is-open {
+    max-height: calc(100vh - 84px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 20px;
+  }
+
+  .mobile-nav-section {
+    position: relative;
+    z-index: 1;
+  }
+
+  .mobile-dropdown {
+    margin-top: 8px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+}
