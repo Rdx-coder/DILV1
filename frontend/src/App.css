@@ -439,15 +439,22 @@
 
 .team-card-role {
   font-size: 14px;
-.team-search-bar {
-  max-width: 520px;
-  margin: 0 auto 26px;
-}
   color: var(--brand-primary);
   font-weight: 600;
   margin: 0 0 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.team-search-bar {
+  max-width: 560px;
+  margin: 0 auto 28px;
+  position: relative;
+  z-index: 2;
+}
+
+.team-search-bar .form-input {
+  width: 100%;
 }
 
 .team-card-bio {

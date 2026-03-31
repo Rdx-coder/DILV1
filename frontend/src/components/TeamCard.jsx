@@ -14,7 +14,8 @@ const TeamCard = ({ member }) => {
     if (url.startsWith('http://') || url.startsWith('https://')) {
       try {
         const parsed = new URL(url);
-        if (parsed.pathname.startsWith('/uploads')) {
+        const isLocalHost = parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1';
+        if (isLocalHost && parsed.pathname.startsWith('/uploads') && assetBase) {
           return `${assetBase}${parsed.pathname}`;
         }
       } catch (_err) {
@@ -25,10 +26,10 @@ const TeamCard = ({ member }) => {
     if (url.startsWith('data:')) {
       return url;
     }
-    if (url.startsWith('/uploads')) {
+    if (url.startsWith('/uploads') && assetBase) {
       return `${assetBase}${url}`;
     }
-    if (url.startsWith('uploads/')) {
+    if (url.startsWith('uploads/') && assetBase) {
       return `${assetBase}/${url}`;
     }
     return url;
