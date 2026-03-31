@@ -7,9 +7,11 @@ const BlogList = () => {
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [blogs, setBlogs] = useState([]);
   const [categories, setCategories] = useState([]);
   const [meta, setMeta] = useState({ page: 1, pages: 1 });
+  const [retryNonce, setRetryNonce] = useState(0);
 
   const filters = useMemo(() => ({
     page: Number(searchParams.get('page') || 1),
@@ -38,6 +40,17 @@ const BlogList = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       setLoading(true);
+      setError('');
+
+      if (!BACKEND_URL || !/^https?:\/\//i.test(BACKEND_URL)) {
+        setBlogs([]);
+        setCategories([]);
+        setMeta({ page: 1, pages: 1 });
+        setError('Blog service URL is not configured. Please check your environment setup.');
+        setLoading(false);
+        return;
+      }
+
       try {
         const query = new URLSearchParams({
           page: String(filters.page),
@@ -48,20 +61,31 @@ const BlogList = () => {
         });
 
         const res = await fetch(`${BACKEND_URL}/api/blogs?${query.toString()}`);
+        if (!res.ok) {
+          throw new Error(`Unable to fetch blog posts (HTTP ${res.status}).`);
+        }
+
         const data = await res.json();
 
-        if (data.success) {
-          setBlogs(data.blogs);
-          setCategories(data.categories || []);
-          setMeta({ page: data.page, pages: data.pages });
+        if (!data.success) {
+          throw new Error(data.message || 'Unable to fetch blog posts right now.');
         }
+
+        setBlogs(data.blogs || []);
+        setCategories(data.categories || []);
+        setMeta({ page: data.page || 1, pages: data.pages || 1 });
+      } catch (err) {
+        setBlogs([]);
+        setCategories([]);
+        setMeta({ page: 1, pages: 1 });
+        setError(err?.message || 'Failed to fetch blog posts. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchBlogs();
-  }, [BACKEND_URL, filters]);
+  }, [BACKEND_URL, filters, retryNonce]);
 
   const updateFilter = (next) => {
     const merged = { ...filters, ...next };
@@ -184,6 +208,18 @@ const BlogList = () => {
             </article>
           ))}
         </div>
+      ) : error ? (
+        <div className="empty-state-card" role="alert">
+          <h3 className="empty-state-title">Unable to load blog posts</h3>
+          <p className="empty-state-description">{error}</p>
+          <button
+            className="btn-secondary"
+            type="button"
+            onClick={() => setRetryNonce((prev) => prev + 1)}
+          >
+            Retry
+          </button>
+        </div>
       ) : blogs.length === 0 ? (
         <div className="empty-state-card" role="status">
           <h3 className="empty-state-title">No blogs found</h3>
@@ -207,7 +243,7 @@ const BlogList = () => {
       <div className="blog-pagination">
         <button
           className="btn-secondary"
-          disabled={meta.page <= 1}
+          disabled={Boolean(error) || meta.page <= 1}
           onClick={() => updateFilter({ page: meta.page - 1 })}
                   aria-label="Previous page"
         >
@@ -218,7 +254,7 @@ const BlogList = () => {
 
         <button
           className="btn-secondary"
-          disabled={meta.page >= meta.pages}
+          disabled={Boolean(error) || meta.page >= meta.pages}
           onClick={() => updateFilter({ page: meta.page + 1 })}
                   aria-label="Next page"
         >
