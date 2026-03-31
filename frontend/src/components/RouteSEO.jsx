@@ -42,6 +42,7 @@ const routeMeta = {
 
 const RouteSEO = () => {
   const { pathname } = useLocation();
+  const siteBaseUrl = (process.env.REACT_APP_FRONTEND_URL || 'https://www.dangiinnovationlab.com').replace(/\/$/, '');
 
   if (pathname.startsWith('/admin')) {
     return (
@@ -63,7 +64,7 @@ const RouteSEO = () => {
     return null;
   }
 
-  const canonical = `${window.location.origin}${pathname}`.replace(/\/$/, '') || window.location.origin;
+  const canonical = `${siteBaseUrl}${pathname}`.replace(/\/$/, '') || siteBaseUrl;
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -76,7 +77,7 @@ const RouteSEO = () => {
         isPartOf: {
           '@type': 'WebSite',
           name: 'Dangi Innovation Lab',
-          url: window.location.origin
+          url: siteBaseUrl
         }
       },
       ...(pathname === '/'
@@ -84,16 +85,16 @@ const RouteSEO = () => {
             {
               '@type': 'Organization',
               name: 'Dangi Innovation Lab',
-              url: window.location.origin,
+              url: siteBaseUrl,
               sameAs: []
             },
             {
               '@type': 'WebSite',
               name: 'Dangi Innovation Lab',
-              url: window.location.origin,
+              url: siteBaseUrl,
               potentialAction: {
                 '@type': 'SearchAction',
-                target: `${window.location.origin}/blog?search={search_term_string}`,
+                target: `${siteBaseUrl}/blog?search={search_term_string}`,
                 'query-input': 'required name=search_term_string'
               }
             }

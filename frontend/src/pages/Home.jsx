@@ -122,6 +122,10 @@ const Home = () => {
             src="https://images.pexels.com/photos/7437499/pexels-photo-7437499.jpeg?auto=compress&cs=tinysrgb&w=1920" 
             alt="Community collaboration"
             className="hero-image"
+            fetchPriority="high"
+            loading="eager"
+            width="1920"
+            height="1280"
           />
           <div className="hero-overlay"></div>
         </div>

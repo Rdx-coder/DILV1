@@ -4762,3 +4762,41 @@ button.tag-chip-link {
 .modal-content {
   background: var(--surface-gradient);
 }
+
+/* Accessibility contrast hardening for Lighthouse-flagged controls/text */
+.hero-cta-secondary,
+.testimonials-cta,
+.btn-secondary {
+  color: #f4f7e6 !important;
+  border-color: #e6f28f !important;
+  background-color: rgba(20, 24, 18, 0.55) !important;
+}
+
+.hero-cta-secondary:hover,
+.testimonials-cta:hover,
+.btn-secondary:hover {
+  color: #161b13 !important;
+  background-color: #efff9f !important;
+  border-color: #efff9f !important;
+}
+
+.how-number {
+  color: #f6ffbf !important;
+  background-color: #2a341f !important;
+  border-color: #d9fb06 !important;
+}
+
+.footer-container,
+.footer-text,
+.footer-follow-cta,
+.footer-copyright,
+.footer-nonprofit,
+.footer-email,
+.footer-links a {
+  color: #dfe6d7 !important;
+}
+
+.footer-links a:hover,
+.footer-email:hover {
+  color: #efff9f !important;
+}
