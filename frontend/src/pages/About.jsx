@@ -1,7 +1,40 @@
 import React from 'react';
-import { Target, Eye, Heart, Globe } from 'lucide-react';
+import { Target, Eye, Heart, Globe, Award } from 'lucide-react';
 
 const About = () => {
+  const dedications = [
+    {
+      name: 'Rambeti Sharma',
+      role: 'Family inspiration and wife of Neem Karoli Baba',
+      link: 'https://en.wikipedia.org/wiki/Ram_Beti_Sharma',
+      image: 'https://tse1.explicit.bing.net/th/id/OIP.fD8D8I2ndrXz-yEP0aeoCAHaLR?rs=1&pid=ImgDetMain&o=7&rm=3'
+    },
+    {
+      name: 'Neem Karoli Baba',
+      role: 'Spiritual guru',
+      link: 'https://en.wikipedia.org/wiki/Neem_Karoli_Baba',
+      image: 'https://upload.wikimedia.org/wikipedia/commons/6/66/Neemkaroli_14.jpg'
+    },
+    {
+      name: 'Mahavatar Babaji',
+      role: 'Immortal yogi',
+      link: 'https://en.wikipedia.org/wiki/Mahavatar_Babaji',
+      image: 'https://upload.wikimedia.org/wikipedia/commons/2/28/Babaji-transparent.png'
+    },
+    {
+      name: 'Ramana Maharshi',
+      role: 'Advaita Vedanta philosopher',
+      link: 'https://en.wikipedia.org/wiki/Ramana_Maharshi',
+      image: 'https://en.wikipedia.org/wiki/Special:FilePath/Sri_Ramana_Maharshi_in_1902.jpg'
+    },
+    {
+      name: 'Srikant Datar',
+      role: 'Dean of Harvard Business School, Design Thinking & Innovation leader',
+      link: 'https://en.wikipedia.org/wiki/Srikant_Datar',
+      image: 'https://th.bing.com/th/id/R.04f158a9e82ba3275544bdac746e1acf?rik=ZuMSr4VrzmTONA&riu=http%3a%2f%2fnews.harvard.edu%2fwp-content%2fuploads%2f2020%2f10%2f111915_1346083.jpg&ehk=VMWV99N%2bC8wG%2bomgOjZWt8wqsxppu359xfrnZK5ga3s%3d&risl=&pid=ImgRaw&r=0'
+    }
+  ];
+
   return (
     <div className="page-container">
       {/* Page Header */}
@@ -128,6 +161,44 @@ const About = () => {
                 We measure success by meaningful outcomes, not numbers alone
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Dedication Section */}
+      <section id="dedication" className="dedication-section">
+        <div className="container">
+          <div className="dedication-header">
+            <h2 className="section-title-center">Dedicated To</h2>
+            <p className="content-text dedication-intro-text">
+              A personal family dedication anchored in the spiritual wisdom of great teachers and the modern leadership of innovation thinkers.
+            </p>
+          </div>
+          <div className="dedication-highlight">
+            <p className="dedication-highlight-text">
+              This website is inspired by family dedication, spiritual guidance, and a commitment to innovation that serves communities.
+            </p>
+          </div>
+          <div className="dedication-grid">
+            {dedications.map((item) => (
+              <div key={item.name} className="dedication-card">
+                {item.image && (
+                  <img
+                    className="dedication-image"
+                    src={item.image}
+                    alt={`${item.name} image`}
+                  />
+                )}
+                <div className="dedication-icon">
+                  <Award size={28} />
+                </div>
+                <h3 className="dedication-title">{item.name}</h3>
+                <p className="dedication-text">{item.role}</p>
+                <a href={item.link} target="_blank" rel="noopener noreferrer" className="dedication-link">
+                  Learn more
+                </a>
+              </div>
+            ))}
           </div>
         </div>
       </section>

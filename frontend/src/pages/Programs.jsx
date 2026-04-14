@@ -1,11 +1,41 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Rocket, GraduationCap, Microscope, Code, Users, ArrowRight, CheckCircle, Clock, Target } from 'lucide-react';
+import { Rocket, GraduationCap, Microscope, Code, Users, ArrowRight, CheckCircle, Clock, Target, Globe } from 'lucide-react';
 import { mockData } from '../mock';
 import SEO from '../components/SEO';
 
 const Programs = () => {
   const pageUrl = `${window.location.origin}/programs`;
+  const [activeSection, setActiveSection] = useState('innovation-journey');
+  const sectionNav = [
+    { id: 'innovation-journey', label: 'Innovation Journey' },
+    { id: 'cohort-program', label: 'Cohort Sprint' },
+    { id: 'focus-areas', label: 'Focus & Support' }
+  ];
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const current = sectionNav.reduce((active, section) => {
+        const element = document.getElementById(section.id);
+        if (!element) return active;
+
+        const top = element.getBoundingClientRect().top;
+        if (top <= window.innerHeight * 0.3) {
+          return section.id;
+        }
+
+        return active;
+      }, 'innovation-journey');
+
+      setActiveSection(current);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
   const upcomingEvents = [
     {
       title: 'Cohort 2026 Application Window',
@@ -31,6 +61,105 @@ const Programs = () => {
       type: 'Webinar',
       details: 'Practical strategies for scholarship essays, recommendations, and interviews.'
     }
+  ];
+
+  const pillars = [
+    {
+      icon: Users,
+      title: 'Accessibility',
+      description: 'Open to innovators regardless of background, geography, or prior experience.'
+    },
+    {
+      icon: Target,
+      title: 'Priority Scope',
+      description: 'Open to all projects while maintaining a focus on high-impact sectors and community need.'
+    },
+    {
+      icon: Rocket,
+      title: 'Agility',
+      description: 'Rapid prototyping and real-world testing are prioritized over theoretical research.'
+    }
+  ];
+
+  const pipelineSteps = [
+    {
+      step: '01',
+      title: 'Problem Sourcing',
+      action: 'Crowdsourcing critical pain points from the public, non-profits, and affected communities.',
+      outcome: 'A curated list of actionable problem statements that can be solved with technology.'
+    },
+    {
+      step: '02',
+      title: 'The Hackathon',
+      action: 'A 48–72 hour virtual sprint to generate ideas, form teams, and build initial prototypes.',
+      outcome: 'Rapidly developed MVP concepts ready for deeper refinement.'
+    },
+    {
+      step: '03',
+      title: 'The Cohort',
+      action: 'A 4–6 week intensive program pairing teams with mentors for product development.',
+      outcome: 'Market-ready or pilot-ready solutions with a clear launch path.'
+    }
+  ];
+
+  const focusAreas = [
+    'Education & Learning',
+    'Civic Tech & Governance',
+    'Health & Wellbeing',
+    'Climate Resilience',
+    'Digital Inclusion'
+  ];
+
+  const infrastructure = [
+    {
+      icon: Globe,
+      title: 'Virtual Workspace',
+      description: 'Slack or Discord for community interaction, networking, and event coordination.'
+    },
+    {
+      icon: Code,
+      title: 'Open Collaboration',
+      description: 'GitHub for open-source code collaboration, issue tracking, and technical review.'
+    },
+    {
+      icon: Microscope,
+      title: 'Project Management',
+      description: 'Trello or Notion for clear milestones, deliverables, and cohort progress tracking.'
+    }
+  ];
+
+  const cohortTimeline = [
+    {
+      week: 'Week 1',
+      phase: 'Validation & Architecture',
+      details: 'Finalize system architecture, define the tech stack, and validate the solution against the problem statement.'
+    },
+    {
+      week: 'Week 2–3',
+      phase: 'Core Development Sprint',
+      details: 'Build the primary product features and integrate essential data models or AI components.'
+    },
+    {
+      week: 'Week 4',
+      phase: 'Testing & QA',
+      details: 'Stress-test the prototype, fix bugs, and gather initial user feedback.'
+    },
+    {
+      week: 'Week 5',
+      phase: 'Refinement & Scaling',
+      details: 'Polish the interface, optimize backend performance, and prepare deployment documentation.'
+    },
+    {
+      week: 'Week 6',
+      phase: 'Demo Day & Handoff',
+      details: 'Pitch the finalized solution to partners and outline the next-stage deployment plan.'
+    }
+  ];
+
+  const graduationCriteria = [
+    'A fully functional, tested prototype.',
+    'Open-source documentation or a clear deployment roadmap.',
+    'A final presentation demonstrating impact on the initial problem statement.'
   ];
 
   const faqJsonLd = {
@@ -87,54 +216,180 @@ const Programs = () => {
         <div className="container">
           <h1 className="page-title">Our Programs</h1>
           <p className="page-subtitle">
-            Structured 6-month innovation cycles designed to transform your goals into reality
+            Structured innovation paths for community-led problem solving and prototype launch.
           </p>
         </div>
       </section>
 
-      {/* Program Overview */}
+      <section className="program-nav-section">
+        <div className="container">
+          <div className="program-nav">
+            {sectionNav.map((section) => (
+              <a
+                key={section.id}
+                href={`#${section.id}`}
+                className={`program-nav-item${activeSection === section.id ? ' active' : ''}`}
+              >
+                {section.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="innovation-journey" className="content-section">
+        <div className="container">
+          <div className="program-card">
+            <div className="program-icon">
+              <Rocket size={36} />
+            </div>
+            <h2 className="program-title">Mission</h2>
+            <p className="program-description">
+              To bridge the gap between real-world problems and scalable technical solutions through community-driven innovation.
+            </p>
+            <ul className="content-list">
+              <li>An online non-profit lab designed to crowdsource complex problem statements.</li>
+              <li>Built to turn ideas into functional prototypes via hackathons and mentorship.</li>
+              <li>Focused on social and technical breakthroughs with measurable impact.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
       <section className="content-section">
         <div className="container">
-          <div className="content-layout">
-            <div className="content-main">
-              <h2 className="content-heading">The 6-Month Innovation Cycle</h2>
-              <p className="content-text">
-                Our flagship program is a comprehensive 6-month journey that combines structured learning, 
-                personalized mentorship, and practical application. Each cycle is designed to take you from 
-                where you are to where you want to be.
+          <div className="how-content">
+            <div className="how-card">
+              <div className="how-number">6</div>
+              <h3 className="how-title">Innovation Journey</h3>
+              <p className="how-description">
+                A 6-month framework designed to move from discovery through prototype development, learning, and launch readiness.
               </p>
-              <div className="program-features">
-                <div className="program-feature">
-                  <CheckCircle size={24} className="feature-icon" />
-                  <div>
-                    <h4 className="feature-title">Personalized Roadmaps</h4>
-                    <p className="feature-text">Custom plans aligned with your goals and current situation</p>
-                  </div>
-                </div>
-                <div className="program-feature">
-                  <CheckCircle size={24} className="feature-icon" />
-                  <div>
-                    <h4 className="feature-title">Expert Mentorship</h4>
-                    <p className="feature-text">Regular guidance from experienced professionals in your field</p>
-                  </div>
-                </div>
-                <div className="program-feature">
-                  <CheckCircle size={24} className="feature-icon" />
-                  <div>
-                    <h4 className="feature-title">Learning Resources</h4>
-                    <p className="feature-text">Curated materials and structured curriculum for skill building</p>
-                  </div>
-                </div>
-                <div className="program-feature">
-                  <CheckCircle size={24} className="feature-icon" />
-                  <div>
-                    <h4 className="feature-title">Community Support</h4>
-                    <p className="feature-text">Connect with peers on similar journeys for collaboration</p>
-                  </div>
-                </div>
-              </div>
+              <ul className="content-list">
+                <li>Problem sourcing from communities and partners.</li>
+                <li>Hackathon sprints to develop MVP concepts.</li>
+                <li>Structured learning with mentorship and feedback.</li>
+              </ul>
+            </div>
+            <div className="how-card">
+              <div className="how-number">4–6</div>
+              <h3 className="how-title">Cohort Sprint</h3>
+              <p className="how-description">
+                A focused sprint inside the larger program where top teams turn early prototypes into pilot-ready products.
+              </p>
+              <ul className="content-list">
+                <li>Dedicated mentorship and weekly milestones.</li>
+                <li>Rapid development, testing, and deployment planning.</li>
+                <li>A final demo and handoff to partners or incubators.</li>
+              </ul>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="content-section">
+        <div className="container">
+          <h2 className="section-title-center">Core Pillars</h2>
+          <div className="programs-grid">
+            {pillars.map((pillar) => {
+              const PillarIcon = pillar.icon;
+              return (
+                <div key={pillar.title} className="program-card">
+                  <div className="program-icon">
+                    <PillarIcon size={36} />
+                  </div>
+                  <h3 className="program-title">{pillar.title}</h3>
+                  <p className="program-description">{pillar.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="content-section">
+        <div className="container">
+          <h2 className="section-title-center">Innovation Pipeline</h2>
+          <div className="programs-grid">
+            {pipelineSteps.map((step) => (
+              <div key={step.step} className="program-card">
+                <div className="program-icon">
+                  <span className="feature-number">{step.step}</span>
+                </div>
+                <h3 className="program-title">{step.title}</h3>
+                <p className="program-description"><strong>Action:</strong> {step.action}</p>
+                <p className="program-description"><strong>Outcome:</strong> {step.outcome}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="focus-areas" className="content-section">
+        <div className="container">
+          <div className="program-card">
+            <h2 className="program-title">Initial Focus Areas</h2>
+            <p className="program-description">
+              We are shaping the lab around sectors with the greatest potential for community impact. These initial focus areas are designed to guide early cohorts while remaining open to high-value projects from any domain.
+            </p>
+            <ul className="content-list">
+              {focusAreas.map((area) => (
+                <li key={area}>{area}</li>
+              ))}
+            </ul>
+            <p className="content-text">
+              Primary focus areas will be finalized through community input and partner collaboration.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="content-section">
+        <div className="container">
+          <h2 className="section-title-center">Technical Infrastructure</h2>
+          <div className="programs-grid">
+            {infrastructure.map((item) => {
+              const InfraIcon = item.icon;
+              return (
+                <div key={item.title} className="program-card">
+                  <div className="program-icon">
+                    <InfraIcon size={36} />
+                  </div>
+                  <h3 className="program-title">{item.title}</h3>
+                  <p className="program-description">{item.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section id="cohort-program" className="how-section">
+        <div className="container">
+          <h2 className="section-title-center">The Cohort Program: From MVP to Launch</h2>
+          <p className="content-text">
+            A 4–6 week intensive program that transitions early prototypes into viable, scalable solutions.
+          </p>
+          <div className="how-content">
+            {cohortTimeline.map((item) => (
+              <div key={item.week} className="how-card">
+                <div className="how-number">{item.week}</div>
+                <h3 className="how-title">{item.phase}</h3>
+                <p className="how-description">{item.details}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="content-section">
+        <div className="container">
+          <h2 className="section-title-center">Graduation Criteria</h2>
+          <ul className="content-list">
+            {graduationCriteria.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
         </div>
       </section>
 
