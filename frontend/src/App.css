@@ -2328,19 +2328,22 @@ button.tag-chip-link {
   font-size: 0.92rem;
 }
 
-.hero-event-card {
-  position: absolute;
-  top: 80px;
-  right: 40px;
-  width: min(380px, calc(100% - 48px));
-  padding: 26px;
-  border-radius: 24px;
-  background: rgba(10, 18, 30, 0.88);
+.hero-event-teaser {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 28px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.26);
-  backdrop-filter: blur(16px);
   color: #f7fbff;
-  z-index: 1;
+  backdrop-filter: blur(14px);
+}
+
+.hero-event-teaser-body {
+  min-width: 0;
 }
 
 .hero-event-topline {
@@ -2390,19 +2393,22 @@ button.tag-chip-link {
 .hero-event-button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  padding: 0.85rem 1.2rem;
+  padding: 0.8rem 1.1rem;
   border-radius: 999px;
   background-color: rgba(233, 255, 180, 0.16);
   border: 1px solid rgba(233, 255, 180, 0.24);
   color: #e8ff1a;
   font-size: 0.95rem;
   font-weight: 700;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
 }
 
 .hero-event-button:hover {
-  background-color: rgba(233, 255, 180, 0.28);
+  background-color: rgba(233, 255, 180, 0.22);
+  transform: translateY(-1px);
 }
 
 .hero-event-loading {
@@ -2411,11 +2417,12 @@ button.tag-chip-link {
 }
 
 @media (max-width: 1024px) {
-  .hero-event-card {
-    position: relative;
-    top: auto;
-    right: auto;
-    margin-top: 32px;
+  .hero-event-teaser {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-event-button {
     width: 100%;
   }
 }
@@ -2425,9 +2432,9 @@ button.tag-chip-link {
     padding: 80px 20px 60px;
   }
 
-  .hero-event-card {
-    margin-top: 28px;
-    padding: 22px;
+  .hero-event-teaser {
+    margin-top: 24px;
+    padding: 18px;
   }
 }
 

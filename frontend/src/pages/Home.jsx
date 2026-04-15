@@ -177,39 +177,37 @@ const Home = () => {
             </Link>
           </div>
           <p className="hero-cta-note">Limited seats each cycle. Early applications get priority review.</p>
-        </div>
 
-        <aside className="hero-event-card" aria-label="Upcoming event preview">
-          <div className="hero-event-topline">
-            <CalendarDays size={18} />
-            <span>{upcomingCount > 1 ? `${upcomingCount} upcoming events` : 'Upcoming event'}</span>
+          <div className="hero-event-teaser" aria-label="Upcoming event preview">
+            <div className="hero-event-teaser-body">
+              <div className="hero-event-topline">
+                <CalendarDays size={18} />
+                <span>{upcomingCount > 1 ? `${upcomingCount} upcoming events` : 'Upcoming event'}</span>
+              </div>
+              {eventLoading ? (
+                <p className="hero-event-description">Loading event schedule...</p>
+              ) : upcomingEvent ? (
+                <>
+                  <h2 className="hero-event-title">{upcomingEvent.title}</h2>
+                  <p className="hero-event-meta">
+                    {new Date(upcomingEvent.startDate).toLocaleString([], {
+                      dateStyle: 'medium',
+                      timeStyle: 'short'
+                    })}
+                    {upcomingEvent.endDate ? ` — ${new Date(upcomingEvent.endDate).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}` : ''}
+                  </p>
+                </>
+              ) : (
+                <p className="hero-event-description">
+                  No scheduled events yet. Find deadlines and announcements on Programs.
+                </p>
+              )}
+            </div>
+            <Link to="/programs#upcoming-events" className="btn-secondary hero-event-button">
+              View upcoming events <ArrowRight size={16} />
+            </Link>
           </div>
-          {eventLoading ? (
-            <div className="hero-event-loading">Loading event schedule...</div>
-          ) : upcomingEvent ? (
-            <>
-              <h2 className="hero-event-title">{upcomingEvent.title}</h2>
-              {upcomingEvent.type ? <span className="hero-event-badge">{upcomingEvent.type}</span> : null}
-              <p className="hero-event-meta">
-                {new Date(upcomingEvent.startDate).toLocaleString([], {
-                  dateStyle: 'medium',
-                  timeStyle: 'short'
-                })}
-                {upcomingEvent.endDate ? ` — ${new Date(upcomingEvent.endDate).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}` : ''}
-              </p>
-              <p className="hero-event-description">
-                {upcomingCount > 1 ? 'Only the next deadline is shown here. View full schedule on Programs.' : 'View the full schedule on Programs.'}
-              </p>
-            </>
-          ) : (
-            <p className="hero-event-description">
-              No scheduled events yet. View all deadlines and announcements on the Programs page.
-            </p>
-          )}
-          <Link to="/programs#upcoming-events" className="btn-secondary hero-event-button">
-            View upcoming events <ArrowRight size={16} />
-          </Link>
-        </aside>
+        </div>
       </section>
 
       {/* Introduction Section */}
