@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Rocket, GraduationCap, Microscope, Code, Users, ArrowRight, CheckCircle, Clock, Target, Globe } from 'lucide-react';
 import { mockData } from '../mock';
 import SEO from '../components/SEO';
@@ -7,6 +7,7 @@ import SEO from '../components/SEO';
 const Programs = () => {
   const pageUrl = `${window.location.origin}/programs`;
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || window.location.origin;
+  const location = useLocation();
   const [activeSection, setActiveSection] = useState('innovation-journey');
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [eventsLoading, setEventsLoading] = useState(true);
@@ -40,6 +41,17 @@ const Programs = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  useEffect(() => {
+    if (location.hash === '#upcoming-events') {
+      const target = document.getElementById('upcoming-events');
+      if (target) {
+        setTimeout(() => {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
+      }
+    }
+  }, [location.hash]);
 
   useEffect(() => {
     const fetchEvents = async () => {

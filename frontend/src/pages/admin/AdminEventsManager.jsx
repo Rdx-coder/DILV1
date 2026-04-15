@@ -245,7 +245,7 @@ const AdminEventsManager = () => {
                         onChange={handleInputChange}
                         className="form-input"
                       />
-                      <p className="form-help">Use your local timezone. If the event is a deadline, leaving end time blank will show only the start timestamp.</p>
+                      <p className="form-help">Enter the event time in your local timezone. Visitors in other time zones will see the converted local time.</p>
                     </div>
                   </div>
 
