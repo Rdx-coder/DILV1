@@ -1,6 +1,7 @@
 const TeamMember = require('../models/TeamMember');
 const fs = require('fs').promises;
 const path = require('path');
+const { destroyImage, uploadTeamMemberImage } = require('../utils/cloudinary');
 
 const parseSocial = (social) => {
   if (!social) return {};
@@ -105,6 +106,41 @@ const mapMemberForResponse = (req, memberDoc) => {
   };
 };
 
+const cleanupLocalUpload = async (filePath) => {
+  if (!filePath) return;
+
+  try {
+    await fs.unlink(filePath);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.error('Error deleting file:', error);
+    }
+  }
+};
+
+const cleanupLegacyLocalImage = async (filename) => {
+  if (!filename) return;
+
+  await cleanupLocalUpload(path.join(__dirname, '../uploads/team/', filename));
+};
+
+const cleanupPreviousImage = async (image) => {
+  if (!image) return;
+
+  try {
+    if (image.publicId) {
+      await destroyImage(image.publicId);
+      return;
+    }
+
+    if (image.filename) {
+      await cleanupLegacyLocalImage(image.filename);
+    }
+  } catch (error) {
+    console.error('Error cleaning up previous image:', error);
+  }
+};
+
 // Get all active team members (public)
 exports.getTeamMembers = async (req, res) => {
   try {
@@ -178,6 +214,8 @@ exports.getAllTeamMembers = async (req, res) => {
 
 // Create team member
 exports.createTeamMember = async (req, res) => {
+  let uploadedImage = null;
+
   try {
     const { name, role, bio, social, order, isActive } = req.body;
 
@@ -192,12 +230,14 @@ exports.createTeamMember = async (req, res) => {
 
     // Handle image upload
     if (req.file) {
-      const imagePath = `/uploads/team/${req.file.filename}`;
+      uploadedImage = await uploadTeamMemberImage(req.file.path, name || role || 'team-member');
       imageData = {
         filename: req.file.filename,
-        url: imagePath,
+        url: uploadedImage.secure_url || uploadedImage.url,
+        publicId: uploadedImage.public_id,
         altText: name || 'Team member'
       };
+      await cleanupLocalUpload(req.file.path);
     }
 
     const memberData = {
@@ -240,16 +280,16 @@ exports.createTeamMember = async (req, res) => {
   } catch (error) {
     // Clean up uploaded file on error
     if (req.file) {
-      try {
-        await fs.unlink(path.join(__dirname, '../', req.file.path));
-      } catch (err) {
-        console.error('Error deleting file:', err);
-      }
+      await cleanupLocalUpload(req.file.path);
+    }
+
+    if (uploadedImage?.public_id) {
+      await cleanupPreviousImage({ publicId: uploadedImage.public_id });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Error creating team member',
+      message: error.statusCode === 500 ? error.message : 'Error creating team member',
       error: error.message
     });
   }
@@ -257,6 +297,8 @@ exports.createTeamMember = async (req, res) => {
 
 // Update team member
 exports.updateTeamMember = async (req, res) => {
+  let uploadedImage = null;
+
   try {
     const { id } = req.params;
     const { name, role, bio, social, order, isActive } = req.body;
@@ -270,18 +312,11 @@ exports.updateTeamMember = async (req, res) => {
       });
     }
 
-    // Handle image replacement
+    const previousImage = member.image ? { ...member.image } : null;
+
     if (req.file) {
-      // Delete old image
-      if (member.image?.filename) {
-        try {
-          await fs.unlink(
-            path.join(__dirname, '../uploads/team/', member.image.filename)
-          );
-        } catch (err) {
-          console.error('Error deleting old file:', err);
-        }
-      }
+      uploadedImage = await uploadTeamMemberImage(req.file.path, name || member.name || role || 'team-member');
+      await cleanupLocalUpload(req.file.path);
     }
 
     member = await withOptionalTransaction(async (session) => {
@@ -298,7 +333,8 @@ exports.updateTeamMember = async (req, res) => {
       if (req.file) {
         doc.image = {
           filename: req.file.filename,
-          url: `/uploads/team/${req.file.filename}`,
+          url: uploadedImage.secure_url || uploadedImage.url,
+          publicId: uploadedImage.public_id,
           altText: name || doc.name || 'Team member'
         };
       }
@@ -319,19 +355,23 @@ exports.updateTeamMember = async (req, res) => {
       message: 'Team member updated successfully',
       data: mapMemberForResponse(req, member)
     });
+
+    if (req.file) {
+      await cleanupPreviousImage(previousImage);
+    }
   } catch (error) {
     // Clean up uploaded file on error
     if (req.file) {
-      try {
-        await fs.unlink(path.join(__dirname, '../', req.file.path));
-      } catch (err) {
-        console.error('Error deleting file:', err);
-      }
+      await cleanupLocalUpload(req.file.path);
+    }
+
+    if (uploadedImage?.public_id) {
+      await cleanupPreviousImage({ publicId: uploadedImage.public_id });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Error updating team member',
+      message: error.statusCode === 500 ? error.message : 'Error updating team member',
       error: error.message
     });
   }
@@ -351,17 +391,6 @@ exports.deleteTeamMember = async (req, res) => {
       });
     }
 
-    // Delete image file
-    if (member.image?.filename) {
-      try {
-        await fs.unlink(
-          path.join(__dirname, '../uploads/team/', member.image.filename)
-        );
-      } catch (err) {
-        console.error('Error deleting file:', err);
-      }
-    }
-
     await withOptionalTransaction(async (session) => {
       if (session) {
         await TeamMember.deleteOne({ _id: id }, { session });
@@ -369,6 +398,8 @@ exports.deleteTeamMember = async (req, res) => {
       }
       await TeamMember.deleteOne({ _id: id });
     });
+
+    await cleanupPreviousImage(member.image);
 
     res.status(200).json({
       success: true,
