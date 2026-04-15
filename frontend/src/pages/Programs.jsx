@@ -114,10 +114,24 @@ const Programs = () => {
     'Digital Inclusion'
   ];
 
+  const formatEventDateRange = (startIso, endIso) => {
+    if (!startIso) return 'Date not scheduled yet';
+    const startFormatted = new Date(startIso).toLocaleString([], {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    });
+    if (!endIso) return startFormatted;
+    const endFormatted = new Date(endIso).toLocaleString([], {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    });
+    return `${startFormatted} — ${endFormatted}`;
+  };
+
   const schemaData = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: 'Programs - DIL Innovation Lab',
+    name: 'Programs - Dangi Innovation Lab',
     description: 'Upcoming events, deadlines, and program details for Dangi Innovation Lab.',
     url: pageUrl,
     publisher: {
@@ -133,7 +147,8 @@ const Programs = () => {
         '@type': 'Event',
         name: eventItem.title,
         eventStatus: 'https://schema.org/EventScheduled',
-        startDate: eventItem.date,
+        startDate: eventItem.startDate,
+        endDate: eventItem.endDate || undefined,
         description: eventItem.details || eventItem.type,
         location: eventItem.location
           ? { '@type': 'Place', name: eventItem.location }
@@ -541,19 +556,19 @@ const Programs = () => {
 
           <div className="event-calendar-grid">
             {eventsLoading ? (
-              <article className="event-card">
+              <article className="event-card event-card-loading">
                 <p className="event-type">Loading</p>
                 <h3 className="event-title">Loading upcoming events</h3>
                 <p className="event-date">Please wait while we load the latest schedule.</p>
               </article>
             ) : eventsError ? (
-              <article className="event-card">
+              <article className="event-card event-card-error">
                 <p className="event-type">Unavailable</p>
                 <h3 className="event-title">Unable to load events</h3>
                 <p className="event-details">{eventsError}</p>
               </article>
             ) : upcomingEvents.length === 0 ? (
-              <article className="event-card">
+              <article className="event-card event-card-empty">
                 <p className="event-type">No events yet</p>
                 <h3 className="event-title">Upcoming events will appear here</h3>
                 <p className="event-details">Add event details from the admin panel to publish deadlines, workshops, and announcements.</p>
@@ -561,16 +576,18 @@ const Programs = () => {
             ) : (
               upcomingEvents.map((eventItem) => (
                 <article key={eventItem._id} className="event-card">
-                  <p className="event-type">{eventItem.type || 'Event'}</p>
+                  <div className="event-card-header">
+                    <p className="event-type">{eventItem.type || 'Event'}</p>
+                    {eventItem.ctaUrl ? (
+                      <a href={eventItem.ctaUrl} target="_blank" rel="noopener noreferrer" className="event-cta-link">
+                        Learn more
+                      </a>
+                    ) : null}
+                  </div>
                   <h3 className="event-title">{eventItem.title}</h3>
-                  <p className="event-date">{new Date(eventItem.date).toLocaleDateString()}</p>
-                  {eventItem.location ? <p className="event-details">{eventItem.location}</p> : null}
-                  <p className="event-details">{eventItem.details}</p>
-                  {eventItem.ctaUrl ? (
-                    <a href={eventItem.ctaUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ marginTop: '1rem', display: 'inline-flex' }}>
-                      Learn more
-                    </a>
-                  ) : null}
+                  <p className="event-date">{formatEventDateRange(eventItem.startDate, eventItem.endDate)}</p>
+                  {eventItem.location ? <p className="event-location">{eventItem.location}</p> : null}
+                  {eventItem.details ? <p className="event-details">{eventItem.details}</p> : null}
                 </article>
               ))
             )}

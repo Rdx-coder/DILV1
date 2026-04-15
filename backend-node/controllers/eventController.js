@@ -17,11 +17,14 @@ const parseOrder = (value, defaultValue = 0) => {
 };
 
 const buildEventPayload = (body) => {
-  const dateValue = body.date ? new Date(body.date) : null;
+  const fallbackDate = body.date ? new Date(body.date) : null;
+  const startDate = body.startDate ? new Date(body.startDate) : fallbackDate;
+  const endDate = body.endDate ? new Date(body.endDate) : null;
   return {
     title: String(body.title || '').trim(),
     type: String(body.type || 'Event').trim(),
-    date: dateValue instanceof Date && !Number.isNaN(dateValue.getTime()) ? dateValue : null,
+    startDate: startDate instanceof Date && !Number.isNaN(startDate.getTime()) ? startDate : null,
+    endDate: endDate instanceof Date && !Number.isNaN(endDate.getTime()) ? endDate : null,
     details: String(body.details || '').trim(),
     location: String(body.location || '').trim(),
     ctaUrl: String(body.ctaUrl || '').trim(),
@@ -34,14 +37,15 @@ const mapEventForResponse = (eventDoc) => {
   const event = eventDoc.toJSON();
   return {
     ...event,
-    date: event.date ? new Date(event.date).toISOString() : null
+    startDate: event.startDate ? new Date(event.startDate).toISOString() : null,
+    endDate: event.endDate ? new Date(event.endDate).toISOString() : null
   };
 };
 
 exports.getPublicEvents = async (req, res) => {
   try {
     const events = await Event.find({ isActive: true })
-      .sort({ order: 1, date: 1, createdAt: -1 })
+      .sort({ order: 1, startDate: 1, createdAt: -1 })
       .select('-__v');
 
     res.status(200).json({
@@ -72,7 +76,7 @@ exports.getEventById = async (req, res) => {
 
 exports.getAllEvents = async (req, res) => {
   try {
-    const events = await Event.find().sort({ order: 1, date: 1, createdAt: -1 }).select('-__v');
+    const events = await Event.find().sort({ order: 1, startDate: 1, createdAt: -1 }).select('-__v');
 
     res.status(200).json({
       success: true,
@@ -89,8 +93,8 @@ exports.createEvent = async (req, res) => {
   try {
     const payload = buildEventPayload(req.body);
 
-    if (!payload.title || !payload.date) {
-      return res.status(400).json({ success: false, message: 'Title and date are required' });
+    if (!payload.title || !payload.startDate) {
+      return res.status(400).json({ success: false, message: 'Title and start date are required' });
     }
 
     const event = await Event.create(payload);
@@ -118,7 +122,8 @@ exports.updateEvent = async (req, res) => {
 
     event.title = payload.title || event.title;
     event.type = payload.type || event.type;
-    event.date = payload.date || event.date;
+    event.startDate = payload.startDate || event.startDate;
+    event.endDate = payload.endDate || event.endDate;
     event.details = payload.details;
     event.location = payload.location;
     event.ctaUrl = payload.ctaUrl;

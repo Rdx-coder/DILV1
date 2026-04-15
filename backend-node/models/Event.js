@@ -13,9 +13,17 @@ const EventSchema = new mongoose.Schema({
     maxlength: [80, 'Event type cannot exceed 80 characters'],
     default: 'Event'
   },
+  startDate: {
+    type: Date,
+    default: null
+  },
+  endDate: {
+    type: Date,
+    default: null
+  },
   date: {
     type: Date,
-    required: [true, 'Please provide an event date']
+    default: null
   },
   details: {
     type: String,
@@ -52,7 +60,7 @@ const EventSchema = new mongoose.Schema({
   }
 });
 
-EventSchema.index({ isActive: 1, order: 1, date: 1 });
+EventSchema.index({ isActive: 1, order: 1, startDate: 1, date: 1 });
 
 EventSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
@@ -65,7 +73,8 @@ EventSchema.methods.toJSON = function() {
     _id: obj._id,
     title: obj.title,
     type: obj.type || 'Event',
-    date: obj.date,
+    startDate: obj.startDate || obj.date || null,
+    endDate: obj.endDate || null,
     details: obj.details,
     location: obj.location,
     ctaUrl: obj.ctaUrl,
