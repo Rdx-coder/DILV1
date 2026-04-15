@@ -4,7 +4,7 @@ import { Linkedin, Mail, Globe, Github } from 'lucide-react';
 const TeamCard = ({ member }) => {
   const [isBioExpanded, setIsBioExpanded] = useState(false);
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
-  const assetBase = BACKEND_URL.replace(/\/api\/?$/, '').replace(/\/$/, '');
+  const assetBase = (BACKEND_URL || (typeof window !== 'undefined' ? window.location.origin : '')).replace(/\/api\/?$/, '').replace(/\/$/, '');
   const fallbackAvatar = `data:image/svg+xml;utf8,${encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="100%" height="100%" fill="#3f4816"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#d9fb06" font-size="42" font-family="Arial, sans-serif">Team Member</text></svg>'
   )}`;

@@ -25,8 +25,8 @@ const AdminTeamManager = () => {
   const [editingId, setEditingId] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
-  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-  const assetBase = (BACKEND_URL || '').replace(/\/api\/?$/, '').replace(/\/$/, '');
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
+  const assetBase = (BACKEND_URL || (typeof window !== 'undefined' ? window.location.origin : '')).replace(/\/api\/?$/, '').replace(/\/$/, '');
 
   const [formData, setFormData] = useState({
     name: '',
