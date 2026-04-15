@@ -12,6 +12,7 @@ const authRoutes = require('./routes/authRoutes');
 const submissionRoutes = require('./routes/submissionRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const blogRoutes = require('./routes/blogRoutes');
+const eventRoutes = require('./routes/eventRoutes');
 const seoRoutes = require('./routes/seoRoutes');
 const teamRoutes = require('./routes/teamRoutes');
 const { processQueuedSeoPings } = require('./controllers/seoController');
@@ -166,6 +167,7 @@ app.use('/api', (req, res, next) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api', submissionRoutes);
+app.use('/api', eventRoutes);
 app.use('/api', blogRoutes);
 app.use('/api/team', teamRoutes);
 app.use('/api/admin', adminRoutes);
