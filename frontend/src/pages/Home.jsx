@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Users, Lightbulb, GraduationCap, TrendingUp } from 'lucide-react';
+import { ArrowRight, Users, Lightbulb, GraduationCap, TrendingUp, CalendarDays } from 'lucide-react';
 import { mockData } from '../mock';
 
 const Home = () => {
@@ -10,6 +10,9 @@ const Home = () => {
   )}`;
   const [latestBlogs, setLatestBlogs] = useState([]);
   const [successStories, setSuccessStories] = useState([]);
+  const [upcomingEvent, setUpcomingEvent] = useState(null);
+  const [eventLoading, setEventLoading] = useState(true);
+  const [eventError, setEventError] = useState(null);
 
   const impactMetrics = [
     {
@@ -91,13 +94,15 @@ const Home = () => {
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const [blogsRes, storiesRes] = await Promise.all([
+        const [blogsRes, storiesRes, eventsRes] = await Promise.all([
           fetch(`${BACKEND_URL}/api/blogs?limit=3&page=1`),
-          fetch(`${BACKEND_URL}/api/blogs?category=success-story&limit=3`)
+          fetch(`${BACKEND_URL}/api/blogs?category=success-story&limit=3`),
+          fetch(`${BACKEND_URL}/api/events`)
         ]);
 
         const blogsData = await blogsRes.json();
         const storiesData = await storiesRes.json();
+        const eventsData = await eventsRes.json();
 
         if (blogsData.success) {
           setLatestBlogs(blogsData.blogs || []);
@@ -105,9 +110,18 @@ const Home = () => {
         if (storiesData.success) {
           setSuccessStories(storiesData.blogs || []);
         }
+        if (eventsData.success && Array.isArray(eventsData.data) && eventsData.data.length > 0) {
+          setUpcomingEvent(eventsData.data[0]);
+        } else {
+          setUpcomingEvent(null);
+        }
       } catch (_error) {
         setLatestBlogs([]);
         setSuccessStories([]);
+        setUpcomingEvent(null);
+        setEventError('Unable to fetch upcoming events');
+      } finally {
+        setEventLoading(false);
       }
     };
 
@@ -152,6 +166,39 @@ const Home = () => {
           </div>
           <p className="hero-cta-note">Limited seats each cycle. Early applications get priority review.</p>
         </div>
+
+        <aside className="hero-event-card" aria-label="Upcoming event preview">
+          <div className="hero-event-topline">
+            <CalendarDays size={18} />
+            <span>Upcoming event</span>
+          </div>
+          {eventLoading ? (
+            <div className="hero-event-loading">Loading event schedule...</div>
+          ) : upcomingEvent ? (
+            <>
+              <h2 className="hero-event-title">{upcomingEvent.title}</h2>
+              {upcomingEvent.type ? <span className="hero-event-badge">{upcomingEvent.type}</span> : null}
+              <p className="hero-event-meta">
+                {new Date(upcomingEvent.startDate).toLocaleString([], {
+                  dateStyle: 'medium',
+                  timeStyle: 'short'
+                })}
+                {upcomingEvent.endDate ? ` — ${new Date(upcomingEvent.endDate).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}` : ''}
+              </p>
+              {upcomingEvent.location ? <p className="hero-event-location">{upcomingEvent.location}</p> : null}
+              <p className="hero-event-description">
+                {upcomingEvent.details || 'Check the Programs page for the full schedule and deadlines.'}
+              </p>
+            </>
+          ) : (
+            <p className="hero-event-description">
+              No scheduled events yet. View all deadlines and announcements on the Programs page.
+            </p>
+          )}
+          <Link to="/programs#upcoming-events" className="btn-secondary hero-event-button">
+            View upcoming events <ArrowRight size={16} />
+          </Link>
+        </aside>
       </section>
 
       {/* Introduction Section */}
