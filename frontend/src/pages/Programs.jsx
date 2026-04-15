@@ -545,7 +545,7 @@ const Programs = () => {
       </section>
 
       {/* Event Calendar */}
-      <section className="event-calendar-section">
+      <section id="upcoming-events" className="event-calendar-section">
         <div className="container">
           <div className="event-calendar-header">
             <h2 className="section-title-center">Upcoming Events & Deadlines</h2>
