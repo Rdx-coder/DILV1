@@ -21,6 +21,7 @@ const TeamMemberSchema = new mongoose.Schema({
   image: {
     filename: String,
     url: String,
+    publicId: String,
     altText: {
       type: String,
       maxlength: [200, 'Alt text cannot exceed 200 characters']
