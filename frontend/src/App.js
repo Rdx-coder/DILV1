@@ -28,6 +28,7 @@ const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminBlogs = lazy(() => import("./pages/admin/AdminBlogs"));
 const AdminBlogEditor = lazy(() => import("./pages/admin/AdminBlogEditor"));
 const AdminTeamManager = lazy(() => import("./pages/admin/AdminTeamManager"));
+const AdminEventsManager = lazy(() => import("./pages/admin/AdminEventsManager"));
 
 const RouterScrollManager = () => {
   useScrollToTop();
@@ -111,6 +112,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AdminTeamManager />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/events"
+              element={
+                <ProtectedRoute>
+                  <AdminEventsManager />
                 </ProtectedRoute>
               }
             />

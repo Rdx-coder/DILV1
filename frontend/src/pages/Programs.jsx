@@ -6,7 +6,11 @@ import SEO from '../components/SEO';
 
 const Programs = () => {
   const pageUrl = `${window.location.origin}/programs`;
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || window.location.origin;
   const [activeSection, setActiveSection] = useState('innovation-journey');
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+  const [eventsError, setEventsError] = useState(null);
   const sectionNav = [
     { id: 'innovation-journey', label: 'Innovation Journey' },
     { id: 'cohort-program', label: 'Cohort Sprint' },
@@ -36,32 +40,32 @@ const Programs = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
-  const upcomingEvents = [
-    {
-      title: 'Cohort 2026 Application Window',
-      date: 'Jan 10 - Feb 20, 2026',
-      type: 'Application',
-      details: 'Submit your track preference, goals, and motivation statement.'
-    },
-    {
-      title: 'Mentor Office Hours',
-      date: 'Feb 8, 2026',
-      type: 'Mentorship',
-      details: 'Live Q&A with alumni mentors on program selection and preparation.'
-    },
-    {
-      title: 'Innovation Sprint Kickoff',
-      date: 'Mar 3, 2026',
-      type: 'Workshop',
-      details: 'A guided workshop to convert community problems into startup-ready ideas.'
-    },
-    {
-      title: 'Scholarship Readiness Webinar',
-      date: 'Mar 18, 2026',
-      type: 'Webinar',
-      details: 'Practical strategies for scholarship essays, recommendations, and interviews.'
-    }
-  ];
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setEventsLoading(true);
+        setEventsError(null);
+        const response = await fetch(`${BACKEND_URL}/api/events`);
+        const data = await response.json();
+
+        if (data.success) {
+          setUpcomingEvents(data.data || []);
+        } else {
+          setEventsError(data.message || 'Failed to load events');
+          setUpcomingEvents([]);
+        }
+      } catch (error) {
+        console.error('Error fetching events:', error);
+        setEventsError('Unable to load events at this time');
+        setUpcomingEvents([]);
+      } finally {
+        setEventsLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, [BACKEND_URL]);
 
   const pillars = [
     {
@@ -109,6 +113,35 @@ const Programs = () => {
     'Climate Resilience',
     'Digital Inclusion'
   ];
+
+  const schemaData = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Programs - DIL Innovation Lab',
+    description: 'Upcoming events, deadlines, and program details for Dangi Innovation Lab.',
+    url: pageUrl,
+    publisher: {
+      '@type': 'Organization',
+      name: 'Dangi Innovation Lab',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${pageUrl}/logo.png`
+      }
+    },
+    hasPart: [
+      ...upcomingEvents.map((eventItem) => ({
+        '@type': 'Event',
+        name: eventItem.title,
+        eventStatus: 'https://schema.org/EventScheduled',
+        startDate: eventItem.date,
+        description: eventItem.details || eventItem.type,
+        location: eventItem.location
+          ? { '@type': 'Place', name: eventItem.location }
+          : { '@type': 'VirtualLocation', url: pageUrl },
+        url: eventItem.ctaUrl || pageUrl
+      }))
+    ]
+  };
 
   const infrastructure = [
     {
@@ -208,7 +241,7 @@ const Programs = () => {
         description="Explore Dangi Innovation Lab programs, structured 6-month innovation cycles, and community-first learning tracks."
         url={pageUrl}
         canonical={pageUrl}
-        jsonLd={faqJsonLd}
+        jsonLd={[schemaData, faqJsonLd]}
       />
 
       {/* Page Header */}
@@ -507,14 +540,40 @@ const Programs = () => {
           </div>
 
           <div className="event-calendar-grid">
-            {upcomingEvents.map((eventItem) => (
-              <article key={eventItem.title} className="event-card">
-                <p className="event-type">{eventItem.type}</p>
-                <h3 className="event-title">{eventItem.title}</h3>
-                <p className="event-date">{eventItem.date}</p>
-                <p className="event-details">{eventItem.details}</p>
+            {eventsLoading ? (
+              <article className="event-card">
+                <p className="event-type">Loading</p>
+                <h3 className="event-title">Loading upcoming events</h3>
+                <p className="event-date">Please wait while we load the latest schedule.</p>
               </article>
-            ))}
+            ) : eventsError ? (
+              <article className="event-card">
+                <p className="event-type">Unavailable</p>
+                <h3 className="event-title">Unable to load events</h3>
+                <p className="event-details">{eventsError}</p>
+              </article>
+            ) : upcomingEvents.length === 0 ? (
+              <article className="event-card">
+                <p className="event-type">No events yet</p>
+                <h3 className="event-title">Upcoming events will appear here</h3>
+                <p className="event-details">Add event details from the admin panel to publish deadlines, workshops, and announcements.</p>
+              </article>
+            ) : (
+              upcomingEvents.map((eventItem) => (
+                <article key={eventItem._id} className="event-card">
+                  <p className="event-type">{eventItem.type || 'Event'}</p>
+                  <h3 className="event-title">{eventItem.title}</h3>
+                  <p className="event-date">{new Date(eventItem.date).toLocaleDateString()}</p>
+                  {eventItem.location ? <p className="event-details">{eventItem.location}</p> : null}
+                  <p className="event-details">{eventItem.details}</p>
+                  {eventItem.ctaUrl ? (
+                    <a href={eventItem.ctaUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ marginTop: '1rem', display: 'inline-flex' }}>
+                      Learn more
+                    </a>
+                  ) : null}
+                </article>
+              ))
+            )}
           </div>
         </div>
       </section>

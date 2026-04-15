@@ -9,7 +9,8 @@ import {
   Zap,
   Settings,
   LogOut,
-  ChevronDown
+  ChevronDown,
+  CalendarDays
 } from 'lucide-react';
 import { logout } from '../../utils/auth';
 import { toast } from '../ui/sonner';
@@ -43,6 +44,11 @@ const Sidebar = () => {
       label: 'Team Manager',
       icon: Users,
       path: '/admin/team',
+    },
+    {
+      label: 'Events Manager',
+      icon: CalendarDays,
+      path: '/admin/events',
     },
     {
       label: 'SEO Monitor',
