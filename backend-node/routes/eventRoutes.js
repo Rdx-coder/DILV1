@@ -15,7 +15,9 @@ const validateRequest = require('../middleware/validateRequest');
 const eventValidation = [
   body('title').trim().notEmpty().withMessage('Title is required').isLength({ max: 180 }),
   body('type').optional({ checkFalsy: true }).trim().isLength({ max: 80 }),
-  body('date').notEmpty().withMessage('Date is required').isISO8601().withMessage('Date must be valid'),
+  body('startDate').notEmpty().withMessage('Start date is required').isISO8601().withMessage('Start date must be a valid date/time'),
+  body('endDate').optional({ checkFalsy: true }).isISO8601().withMessage('End date must be a valid date/time'),
+  body('date').optional({ checkFalsy: true }).isISO8601().withMessage('Date must be a valid date'),
   body('details').optional({ checkFalsy: true }).trim().isLength({ max: 1000 }),
   body('location').optional({ checkFalsy: true }).trim().isLength({ max: 180 }),
   body('ctaUrl').optional({ checkFalsy: true }).trim().isURL().withMessage('CTA URL must be a valid URL'),

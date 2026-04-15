@@ -16,13 +16,35 @@ const AdminEventsManager = () => {
   const [formData, setFormData] = useState({
     title: '',
     type: '',
-    date: '',
+    startDate: '',
+    endDate: '',
     details: '',
     location: '',
     ctaUrl: '',
     order: 0,
     isActive: true
   });
+
+  const formatDateForInput = (isoString) => {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    const offsetMs = date.getTimezoneOffset() * 60000;
+    return new Date(date - offsetMs).toISOString().slice(0, 16);
+  };
+
+  const formatEventDateRange = (startIso, endIso) => {
+    if (!startIso) return 'Start date not set';
+    const start = new Date(startIso).toLocaleString([], {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    });
+    if (!endIso) return start;
+    const end = new Date(endIso).toLocaleString([], {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    });
+    return `${start} — ${end}`;
+  };
 
   useEffect(() => {
     fetchEvents();
@@ -53,7 +75,8 @@ const AdminEventsManager = () => {
     setFormData({
       title: '',
       type: '',
-      date: '',
+      startDate: '',
+      endDate: '',
       details: '',
       location: '',
       ctaUrl: '',
@@ -76,7 +99,8 @@ const AdminEventsManager = () => {
     setFormData({
       title: eventItem.title || '',
       type: eventItem.type || '',
-      date: eventItem.date ? eventItem.date.split('T')[0] : '',
+      startDate: formatDateForInput(eventItem.startDate),
+      endDate: formatDateForInput(eventItem.endDate),
       details: eventItem.details || '',
       location: eventItem.location || '',
       ctaUrl: eventItem.ctaUrl || '',
@@ -113,8 +137,8 @@ const AdminEventsManager = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!formData.title.trim() || !formData.date.trim()) {
-      notify.error('Please fill in the event title and date');
+    if (!formData.title.trim() || !formData.startDate.trim()) {
+      notify.error('Please fill in the event title and start date');
       return;
     }
 
@@ -212,19 +236,32 @@ const AdminEventsManager = () => {
                       />
                     </div>
                     <div className="form-section">
-                      <label htmlFor="event-date">Date *</label>
+                      <label htmlFor="event-startDate">Start Date & Time *</label>
                       <input
-                        id="event-date"
-                        type="date"
-                        name="date"
-                        value={formData.date}
+                        id="event-startDate"
+                        type="datetime-local"
+                        name="startDate"
+                        value={formData.startDate}
                         onChange={handleInputChange}
                         className="form-input"
                       />
+                      <p className="form-help">Use your local timezone. If the event is a deadline, leaving end time blank will show only the start timestamp.</p>
                     </div>
                   </div>
 
                   <div className="form-grid-two">
+                    <div className="form-section">
+                      <label htmlFor="event-endDate">End Date & Time</label>
+                      <input
+                        id="event-endDate"
+                        type="datetime-local"
+                        name="endDate"
+                        value={formData.endDate}
+                        onChange={handleInputChange}
+                        className="form-input"
+                      />
+                      <p className="form-help">Optional — leave empty for a same-day deadline or session.</p>
+                    </div>
                     <div className="form-section">
                       <label htmlFor="event-type">Type</label>
                       <input
@@ -342,7 +379,7 @@ const AdminEventsManager = () => {
                     <div className="team-item-content">
                       <h4>{eventItem.title}</h4>
                       <p className="team-role">{eventItem.type || 'Event'}</p>
-                      <p className="team-bio">{new Date(eventItem.date).toLocaleDateString()}</p>
+                      <p className="team-bio">{formatEventDateRange(eventItem.startDate, eventItem.endDate)}</p>
                       {eventItem.location ? <p className="team-bio">{eventItem.location}</p> : null}
                       {eventItem.details ? <p className="team-bio">{eventItem.details}</p> : null}
                       {eventItem.ctaUrl ? (
