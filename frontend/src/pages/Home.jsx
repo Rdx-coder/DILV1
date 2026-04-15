@@ -2,15 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Users, Lightbulb, GraduationCap, TrendingUp, CalendarDays } from 'lucide-react';
 import { mockData } from '../mock';
+import SEO from '../components/SEO';
 
 const Home = () => {
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+  const FRONTEND_URL = process.env.REACT_APP_FRONTEND_URL || window.location.origin;
   const blogImageFallback = `data:image/svg+xml;utf8,${encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2c3316"/><stop offset="100%" stop-color="#1a1c1b"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#g)"/><text x="50%" y="48%" dominant-baseline="middle" text-anchor="middle" fill="#d9fb06" font-size="52" font-family="Arial, sans-serif">Dangi Innovation Lab</text><text x="50%" y="58%" dominant-baseline="middle" text-anchor="middle" fill="#f3f8df" font-size="28" font-family="Arial, sans-serif">Blog Update</text></svg>'
   )}`;
   const [latestBlogs, setLatestBlogs] = useState([]);
   const [successStories, setSuccessStories] = useState([]);
   const [upcomingEvent, setUpcomingEvent] = useState(null);
+  const [upcomingCount, setUpcomingCount] = useState(0);
   const [eventLoading, setEventLoading] = useState(true);
   const [eventError, setEventError] = useState(null);
 
@@ -112,13 +115,16 @@ const Home = () => {
         }
         if (eventsData.success && Array.isArray(eventsData.data) && eventsData.data.length > 0) {
           setUpcomingEvent(eventsData.data[0]);
+          setUpcomingCount(eventsData.data.length);
         } else {
           setUpcomingEvent(null);
+          setUpcomingCount(0);
         }
       } catch (_error) {
         setLatestBlogs([]);
         setSuccessStories([]);
         setUpcomingEvent(null);
+        setUpcomingCount(0);
         setEventError('Unable to fetch upcoming events');
       } finally {
         setEventLoading(false);
@@ -132,6 +138,12 @@ const Home = () => {
 
   return (
     <div className="page-container">
+      <SEO
+        title="Dangi Innovation Lab | Community Programs and Upcoming Events"
+        description="Dangi Innovation Lab empowers underserved communities through structured programs, mentorship, and timely event updates."
+        url={`${FRONTEND_URL}/`}
+        canonical={`${FRONTEND_URL}/`}
+      />
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-background">
@@ -170,7 +182,7 @@ const Home = () => {
         <aside className="hero-event-card" aria-label="Upcoming event preview">
           <div className="hero-event-topline">
             <CalendarDays size={18} />
-            <span>Upcoming event</span>
+            <span>{upcomingCount > 1 ? `${upcomingCount} upcoming events` : 'Upcoming event'}</span>
           </div>
           {eventLoading ? (
             <div className="hero-event-loading">Loading event schedule...</div>
@@ -185,9 +197,8 @@ const Home = () => {
                 })}
                 {upcomingEvent.endDate ? ` — ${new Date(upcomingEvent.endDate).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}` : ''}
               </p>
-              {upcomingEvent.location ? <p className="hero-event-location">{upcomingEvent.location}</p> : null}
               <p className="hero-event-description">
-                {upcomingEvent.details || 'Check the Programs page for the full schedule and deadlines.'}
+                {upcomingCount > 1 ? 'Only the next deadline is shown here. View full schedule on Programs.' : 'View the full schedule on Programs.'}
               </p>
             </>
           ) : (
