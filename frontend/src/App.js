@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AppLoader from "./components/AppLoader";
 import { Toaster } from "./components/ui/sonner";
 import RouteSEO from "./components/RouteSEO";
 import FloatingContactButton from "./components/FloatingContactButton";
@@ -76,7 +77,7 @@ function App() {
         <ErrorBoundary>
           <RouteSEO />
           <Analytics />
-          <Suspense fallback={<div className="empty-state">Loading page...</div>}>
+          <Suspense fallback={<AppLoader />}>
             <Routes>
             {/* Admin Routes (no header/footer) */}
             <Route path="/admin/login" element={<AdminLogin />} />
