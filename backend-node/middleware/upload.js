@@ -2,17 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 
-const blogUploadDir = path.join(__dirname, '..', 'uploads', 'blog');
-const teamUploadDir = path.join(__dirname, '..', 'uploads', 'team');
-
-[blogUploadDir, teamUploadDir].forEach((dir) => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+const ensureDir = (dirPath) => {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
   }
-});
+};
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, blogUploadDir),
+const createStorage = (uploadDir) => multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, uploadDir),
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
     const safeBase = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9-_]/g, '-');
@@ -27,26 +24,24 @@ const fileFilter = (_req, file, cb) => {
   return cb(null, true);
 };
 
-const upload = multer({
-  storage,
-  fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }
-});
+const createImageUpload = (directoryName = 'general') => {
+  const uploadDir = path.join(__dirname, '..', 'uploads', directoryName);
+  ensureDir(uploadDir);
 
-const teamStorage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, teamUploadDir),
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const safeBase = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9-_]/g, '-');
-    cb(null, `${Date.now()}-${safeBase}${ext}`);
-  }
-});
+  return multer({
+    storage: createStorage(uploadDir),
+    fileFilter,
+    limits: { fileSize: 5 * 1024 * 1024 }
+  });
+};
 
-const uploadTeam = multer({
-  storage: teamStorage,
-  fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }
-});
+const upload = createImageUpload('blog');
+const uploadTeam = createImageUpload('team');
+const uploadProducts = createImageUpload('products');
+const uploadSponsors = createImageUpload('sponsors');
 
 module.exports = upload;
 module.exports.uploadTeam = uploadTeam;
+module.exports.uploadProducts = uploadProducts;
+module.exports.uploadSponsors = uploadSponsors;
+module.exports.createImageUpload = createImageUpload;

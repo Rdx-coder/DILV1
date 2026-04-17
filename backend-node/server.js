@@ -15,6 +15,8 @@ const blogRoutes = require('./routes/blogRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const seoRoutes = require('./routes/seoRoutes');
 const teamRoutes = require('./routes/teamRoutes');
+const productRoutes = require('./routes/productRoutes');
+const sponsorRoutes = require('./routes/sponsorRoutes');
 const { processQueuedSeoPings } = require('./controllers/seoController');
 const { issueCsrfToken, requireCsrf } = require('./middleware/csrf');
 
@@ -170,6 +172,8 @@ app.use('/api', submissionRoutes);
 app.use('/api', eventRoutes);
 app.use('/api', blogRoutes);
 app.use('/api/team', teamRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/sponsors', sponsorRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/', seoRoutes);
 
@@ -186,6 +190,8 @@ app.get('/api', (req, res) => {
       application: '/api/application',
       newsletter: '/api/newsletter',
       blogs: '/api/blogs',
+      products: '/api/products',
+      sponsors: '/api/sponsors',
       admin: '/api/admin'
     }
   });

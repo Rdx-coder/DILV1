@@ -51,6 +51,8 @@ const Header = () => {
 
   const navLinks = [
     { path: '/', label: 'Home' },
+    { path: '/products', label: 'Products' },
+    { path: '/sponsors', label: 'Sponsors' },
     { path: '/blog', label: 'Blog' },
     { path: '/programs', label: 'Programs' },
     { path: '/mentorship', label: 'Mentorship' },
@@ -61,7 +63,7 @@ const Header = () => {
   
   const aboutDropdown = [
     { path: '/about', label: 'About Us' },
-    { path: '/team', label: 'Team Member' },
+    { path: '/team', label: 'Team Members' },
     { path: '/success-stories', label: 'Success Stories' }
   ];
 

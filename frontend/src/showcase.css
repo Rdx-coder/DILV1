@@ -1,0 +1,331 @@
+.showcase-section {
+  padding: 5rem 0;
+}
+
+.showcase-section-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.showcase-subtitle,
+.showcase-eyebrow {
+  margin: 0 0 0.5rem;
+  color: var(--accent-color, #d9fb06);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.showcase-grid,
+.showcase-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.sponsor-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.showcase-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(20, 24, 23, 0.9);
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.showcase-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(217, 251, 6, 0.3);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.22);
+}
+
+.product-card-image-link {
+  display: block;
+}
+
+.product-card-image,
+.showcase-admin-image,
+.showcase-skeleton-image {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+.product-card-image-fallback,
+.showcase-admin-image-fallback {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(61, 80, 24, 0.9), rgba(19, 24, 22, 0.95));
+  color: #f3f8df;
+  font-weight: 600;
+  padding: 1rem;
+  text-align: center;
+}
+
+.product-card-content,
+.sponsor-card-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 1.25rem;
+}
+
+.product-card-title,
+.product-card-title a,
+.showcase-detail-title {
+  color: inherit;
+}
+
+.product-card-description,
+.showcase-detail-description {
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.7;
+}
+
+.product-card-actions,
+.showcase-detail-actions,
+.showcase-toolbar,
+.showcase-admin-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.sponsor-card {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.25rem;
+}
+
+.sponsor-card-logo-wrap {
+  display: grid;
+  place-items: center;
+  min-height: 100px;
+}
+
+.sponsor-card-logo,
+.showcase-skeleton-logo {
+  width: 100%;
+  max-width: 180px;
+  height: 72px;
+  object-fit: contain;
+  filter: grayscale(1);
+  opacity: 0.82;
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+.sponsor-card:hover .sponsor-card-logo {
+  filter: grayscale(0);
+  opacity: 1;
+}
+
+.sponsor-card-logo-fallback {
+  display: grid;
+  place-items: center;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 1rem;
+  color: #f3f8df;
+}
+
+.sponsor-card-link,
+.showcase-back-link,
+.showcase-admin-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #d9fb06;
+}
+
+.showcase-page-hero {
+  padding-bottom: 2rem;
+}
+
+.showcase-toolbar-section {
+  padding-bottom: 1rem;
+}
+
+.showcase-search {
+  max-width: 420px;
+}
+
+.showcase-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.7rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  color: inherit;
+}
+
+.showcase-filter-chip.active {
+  border-color: rgba(217, 251, 6, 0.5);
+  background: rgba(217, 251, 6, 0.12);
+}
+
+.showcase-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.showcase-detail-section {
+  padding: 3rem 0 5rem;
+}
+
+.showcase-detail-card {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(20, 24, 23, 0.92);
+}
+
+.showcase-detail-image {
+  width: 100%;
+  max-height: 560px;
+  object-fit: cover;
+}
+
+.showcase-detail-body {
+  padding: 1.5rem;
+}
+
+.showcase-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 1rem;
+}
+
+.showcase-skeleton {
+  padding: 1rem;
+}
+
+.showcase-skeleton-image,
+.showcase-skeleton-logo,
+.showcase-skeleton-line {
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05));
+  background-size: 200% 100%;
+  animation: showcasePulse 1.4s ease infinite;
+}
+
+.showcase-skeleton-line {
+  height: 14px;
+  margin-top: 0.9rem;
+}
+
+.showcase-skeleton-line.wide {
+  width: 80%;
+}
+
+.showcase-skeleton-line.short {
+  width: 55%;
+}
+
+.showcase-skeleton-image.tall {
+  min-height: 360px;
+}
+
+.sponsor-skeleton {
+  justify-content: center;
+}
+
+.showcase-admin-card {
+  gap: 1rem;
+}
+
+.showcase-admin-image-wrap {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.showcase-admin-headline {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.showcase-status-badge {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  text-transform: capitalize;
+  border: 1px solid transparent;
+}
+
+.showcase-status-badge.active {
+  color: #b6f08b;
+  background: rgba(32, 94, 49, 0.26);
+  border-color: rgba(182, 240, 139, 0.2);
+}
+
+.showcase-status-badge.inactive {
+  color: #f3c78d;
+  background: rgba(122, 67, 20, 0.25);
+  border-color: rgba(243, 199, 141, 0.2);
+}
+
+.admin-showcase-form .form-textarea,
+.admin-showcase-form .form-input {
+  width: 100%;
+}
+
+.sponsor-preview,
+.sponsor-admin-image {
+  object-fit: contain;
+  background: #fff;
+}
+
+.sponsor-logo-wrap {
+  padding: 1rem;
+  background: #fff;
+}
+
+@keyframes showcasePulse {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 1024px) {
+  .showcase-grid,
+  .showcase-admin-grid,
+  .sponsor-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .showcase-section-header,
+  .showcase-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .showcase-grid,
+  .showcase-admin-grid,
+  .sponsor-grid {
+    grid-template-columns: 1fr;
+  }
+}
