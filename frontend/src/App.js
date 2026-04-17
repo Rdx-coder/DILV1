@@ -1,5 +1,6 @@
 import React, { Suspense, lazy, useEffect } from "react";
 import "./App.css";
+import "./showcase.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -23,12 +24,17 @@ const BlogList = lazy(() => import("./pages/BlogList"));
 const BlogDetail = lazy(() => import("./pages/BlogDetail"));
 const Team = lazy(() => import("./pages/Team"));
 const SuccessStories = lazy(() => import("./pages/SuccessStories"));
+const Products = lazy(() => import("./pages/Products"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
+const Sponsors = lazy(() => import("./pages/Sponsors"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminBlogs = lazy(() => import("./pages/admin/AdminBlogs"));
 const AdminBlogEditor = lazy(() => import("./pages/admin/AdminBlogEditor"));
 const AdminTeamManager = lazy(() => import("./pages/admin/AdminTeamManager"));
 const AdminEventsManager = lazy(() => import("./pages/admin/AdminEventsManager"));
+const AdminProductsManager = lazy(() => import("./pages/admin/AdminProductsManager"));
+const AdminSponsorsManager = lazy(() => import("./pages/admin/AdminSponsorsManager"));
 
 const RouterScrollManager = () => {
   useScrollToTop();
@@ -123,6 +129,22 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/admin/products"
+              element={
+                <ProtectedRoute>
+                  <AdminProductsManager />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/sponsors"
+              element={
+                <ProtectedRoute>
+                  <AdminSponsorsManager />
+                </ProtectedRoute>
+              }
+            />
             {/* Public Routes (with header/footer) */}
             <Route
               path="/*"
@@ -135,6 +157,9 @@ function App() {
                       <Route path="/about" element={<About />} />
                       <Route path="/team" element={<Team />} />
                       <Route path="/success-stories" element={<SuccessStories />} />
+                      <Route path="/products" element={<Products />} />
+                      <Route path="/products/:slug" element={<ProductDetail />} />
+                      <Route path="/sponsors" element={<Sponsors />} />
                       <Route path="/blog" element={<BlogList />} />
                       <Route path="/blog/:slug" element={<BlogDetail />} />
                       <Route path="/programs" element={<Programs />} />

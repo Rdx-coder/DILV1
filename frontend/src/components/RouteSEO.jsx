@@ -37,6 +37,16 @@ const routeMeta = {
     title: 'Contact | Dangi Innovation Lab',
     description: 'Get in touch with Dangi Innovation Lab for partnerships, support, and queries.',
     keywords: 'contact dangi innovation lab, partnerships, support'
+  },
+  '/products': {
+    title: 'Our Products | Dangi Innovation Lab',
+    description: 'Explore products and innovation projects built by Dangi Innovation Lab.',
+    keywords: 'dangi innovation lab products, innovation portfolio, projects'
+  },
+  '/sponsors': {
+    title: 'Our Sponsors | Dangi Innovation Lab',
+    description: 'Meet the sponsors and ecosystem partners supporting Dangi Innovation Lab.',
+    keywords: 'dangi innovation lab sponsors, partners, supporters'
   }
 };
 

@@ -21,21 +21,30 @@ const ensureCloudinaryConfigured = () => {
   });
 };
 
-const uploadTeamMemberImage = async (filePath, memberName = 'team-member') => {
-  ensureCloudinaryConfigured();
-
-  const publicIdBase = String(memberName)
+const sanitizePublicIdBase = (value = '', fallback = 'asset') => {
+  return String(value)
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '') || 'team-member';
+    .replace(/^-+|-+$/g, '') || fallback;
+};
+
+const uploadImageAsset = async (filePath, { folder, publicIdBase = 'asset' } = {}) => {
+  ensureCloudinaryConfigured();
 
   return cloudinary.uploader.upload(filePath, {
-    folder: 'dil/team-members',
+    folder: folder || 'dil/assets',
     resource_type: 'image',
-    public_id: `${publicIdBase}-${Date.now()}`,
+    public_id: `${sanitizePublicIdBase(publicIdBase, 'asset')}-${Date.now()}`,
     overwrite: false,
     invalidate: true
+  });
+};
+
+const uploadTeamMemberImage = async (filePath, memberName = 'team-member') => {
+  return uploadImageAsset(filePath, {
+    folder: 'dil/team-members',
+    publicIdBase: memberName
   });
 };
 
@@ -53,5 +62,6 @@ const destroyImage = async (publicId) => {
 module.exports = {
   destroyImage,
   isCloudinaryConfigured,
+  uploadImageAsset,
   uploadTeamMemberImage
 };

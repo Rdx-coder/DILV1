@@ -42,6 +42,26 @@ exports.protect = async (req, res, next) => {
   }
 };
 
+exports.authorize = (...roles) => {
+  return (req, res, next) => {
+    if (!req.admin) {
+      return res.status(401).json({
+        success: false,
+        message: 'Not authorized to access this route'
+      });
+    }
+
+    if (roles.length > 0 && !roles.includes(req.admin.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Insufficient permissions'
+      });
+    }
+
+    return next();
+  };
+};
+
 exports.generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE

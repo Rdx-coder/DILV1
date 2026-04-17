@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Users, Lightbulb, GraduationCap, TrendingUp, CalendarDays } from 'lucide-react';
 import { mockData } from '../mock';
 import SEO from '../components/SEO';
+import HomeProductsSection from '../components/catalog/HomeProductsSection';
+import HomeSponsorsSection from '../components/catalog/HomeSponsorsSection';
 
 const Home = () => {
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -318,6 +320,8 @@ const Home = () => {
         </div>
       </section>
 
+      <HomeProductsSection />
+
       {/* Stats Section */}
       <section className="stats-section">
         <div className="container">
@@ -419,6 +423,8 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      <HomeSponsorsSection />
 
       {/* Trust Badges Section */}
       <section className="trust-badges-section">

@@ -51,6 +51,16 @@ const Sidebar = () => {
       path: '/admin/events',
     },
     {
+      label: 'Products Manager',
+      icon: BookOpen,
+      path: '/admin/products',
+    },
+    {
+      label: 'Sponsors Manager',
+      icon: Users,
+      path: '/admin/sponsors',
+    },
+    {
       label: 'SEO Monitor',
       icon: Zap,
       path: '/admin/dashboard?tab=seo',

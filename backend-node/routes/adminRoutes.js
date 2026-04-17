@@ -19,7 +19,19 @@ const {
   getAdminBlogs,
   getAdminBlogById
 } = require('../controllers/blogController');
-const { protect } = require('../middleware/auth');
+const {
+  getAdminProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct
+} = require('../controllers/productController');
+const {
+  getAdminSponsors,
+  createSponsor,
+  updateSponsor,
+  deleteSponsor
+} = require('../controllers/sponsorController');
+const { protect, authorize } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const validateRequest = require('../middleware/validateRequest');
 const { body, param } = require('express-validator');
@@ -97,8 +109,37 @@ const idValidation = [
   param('id').isMongoId().withMessage('Invalid blog id')
 ];
 
+const productIdValidation = [
+  param('id').isMongoId().withMessage('Invalid product id')
+];
+
+const sponsorIdValidation = [
+  param('id').isMongoId().withMessage('Invalid sponsor id')
+];
+
+const productValidation = [
+  body('title').trim().notEmpty().withMessage('Title is required').isLength({ max: 160 }),
+  body('slug').optional({ checkFalsy: true }).trim().matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).withMessage('Slug must be URL-friendly'),
+  body('description').trim().notEmpty().withMessage('Short description is required').isLength({ max: 240 }),
+  body('fullDescription').optional({ checkFalsy: true }).trim().isLength({ max: 6000 }),
+  body('imageUrl').optional({ checkFalsy: true }).trim().isURL().withMessage('Image URL must be valid'),
+  body('projectUrl').trim().notEmpty().withMessage('Project URL is required').isURL().withMessage('Project URL must be valid'),
+  body('imageAlt').optional({ checkFalsy: true }).trim().isLength({ max: 180 }),
+  body('status').optional().isIn(['active', 'inactive']).withMessage('Status must be active or inactive')
+];
+
+const sponsorValidation = [
+  body('name').trim().notEmpty().withMessage('Name is required').isLength({ max: 140 }),
+  body('logoUrl').optional({ checkFalsy: true }).trim().isURL().withMessage('Logo URL must be valid'),
+  body('websiteUrl').trim().notEmpty().withMessage('Website URL is required').isURL().withMessage('Website URL must be valid'),
+  body('logoAlt').optional({ checkFalsy: true }).trim().isLength({ max: 180 }),
+  body('tier').optional().isIn(['Gold', 'Silver', 'Partner']).withMessage('Tier must be Gold, Silver, or Partner'),
+  body('status').optional().isIn(['active', 'inactive']).withMessage('Status must be active or inactive')
+];
+
 // All routes are protected
 router.use(protect);
+router.use(authorize('admin'));
 
 router.get('/submissions', getSubmissions);
 router.get('/submissions/:id', getSubmission);
@@ -116,5 +157,15 @@ router.put('/blog/:id', handleBlogFileUpload, idValidation, blogValidation, vali
 router.delete('/blog/:id', idValidation, validateRequest, deleteBlog);
 router.get('/blogs', getAdminBlogs);
 router.get('/blog/:id', idValidation, validateRequest, getAdminBlogById);
+
+router.get('/products', getAdminProducts);
+router.post('/products', upload.uploadProducts.single('image'), productValidation, validateRequest, createProduct);
+router.put('/products/:id', upload.uploadProducts.single('image'), productIdValidation, productValidation, validateRequest, updateProduct);
+router.delete('/products/:id', productIdValidation, validateRequest, deleteProduct);
+
+router.get('/sponsors', getAdminSponsors);
+router.post('/sponsors', upload.uploadSponsors.single('logo'), sponsorValidation, validateRequest, createSponsor);
+router.put('/sponsors/:id', upload.uploadSponsors.single('logo'), sponsorIdValidation, sponsorValidation, validateRequest, updateSponsor);
+router.delete('/sponsors/:id', sponsorIdValidation, validateRequest, deleteSponsor);
 
 module.exports = router;

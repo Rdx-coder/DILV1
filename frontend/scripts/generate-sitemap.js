@@ -9,6 +9,8 @@ const STATIC_ROUTES = [
   { path: '/', changefreq: 'weekly', priority: '1.0' },
   { path: '/about', changefreq: 'monthly', priority: '0.8' },
   { path: '/team', changefreq: 'weekly', priority: '0.8' },
+  { path: '/products', changefreq: 'weekly', priority: '0.8' },
+  { path: '/sponsors', changefreq: 'monthly', priority: '0.7' },
   { path: '/blog', changefreq: 'daily', priority: '0.9' },
   { path: '/programs', changefreq: 'monthly', priority: '0.8' },
   { path: '/mentorship', changefreq: 'monthly', priority: '0.8' },
@@ -68,7 +70,30 @@ async function fetchPublishedBlogs() {
   return blogs;
 }
 
-function buildSitemapXml(dynamicBlogs) {
+async function fetchPublishedProducts() {
+  if (!BACKEND_BASE) {
+    return [];
+  }
+
+  const endpoint = `${BACKEND_BASE}/api/products?limit=100`;
+  const response = await fetch(endpoint, {
+    headers: { Accept: 'application/json' }
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch products from ${endpoint} (HTTP ${response.status})`);
+  }
+
+  const payload = await response.json();
+  return Array.isArray(payload.data)
+    ? payload.data.map((item) => ({
+        slug: item.slug,
+        lastmod: item.updatedAt || item.createdAt || null
+      }))
+    : [];
+}
+
+function buildSitemapXml(dynamicBlogs, dynamicProducts) {
   const nowIso = new Date().toISOString();
 
   const staticEntries = STATIC_ROUTES.map((route) => ({
@@ -85,7 +110,14 @@ function buildSitemapXml(dynamicBlogs) {
     priority: '0.8'
   }));
 
-  const allEntries = [...staticEntries, ...blogEntries];
+  const productEntries = dynamicProducts.map((product) => ({
+    loc: `${SITE_BASE}/products/${encodeURIComponent(product.slug)}`,
+    lastmod: product.lastmod ? new Date(product.lastmod).toISOString() : nowIso,
+    changefreq: 'weekly',
+    priority: '0.8'
+  }));
+
+  const allEntries = [...staticEntries, ...blogEntries, ...productEntries];
 
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${allEntries
     .map((entry) => `  <url>\n    <loc>${escapeXml(entry.loc)}</loc>\n    <lastmod>${escapeXml(entry.lastmod)}</lastmod>\n    <changefreq>${entry.changefreq}</changefreq>\n    <priority>${entry.priority}</priority>\n  </url>`)
@@ -95,6 +127,7 @@ function buildSitemapXml(dynamicBlogs) {
 async function run() {
   try {
     let blogs = [];
+    let products = [];
     try {
       blogs = await fetchPublishedBlogs();
       console.log(`[sitemap] Loaded ${blogs.length} published blog URL(s).`);
@@ -103,7 +136,15 @@ async function run() {
       console.warn('[sitemap] Continuing with static routes only.');
     }
 
-    const xml = buildSitemapXml(blogs);
+    try {
+      products = await fetchPublishedProducts();
+      console.log(`[sitemap] Loaded ${products.length} published product URL(s).`);
+    } catch (error) {
+      console.warn(`[sitemap] ${error.message}`);
+      console.warn('[sitemap] Continuing without dynamic product URLs.');
+    }
+
+    const xml = buildSitemapXml(blogs, products);
     await fs.writeFile(OUTPUT_PATH, xml, 'utf8');
     console.log(`[sitemap] Generated ${OUTPUT_PATH}`);
   } catch (error) {
