@@ -6,6 +6,116 @@ import { notify } from '../../utils/notify';
 import Sidebar from '../../components/admin/Sidebar';
 import SEO from '../../components/SEO';
 
+const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+
+const TIMEZONE_OPTIONS = [
+  { value: browserTimeZone, label: `Browser local (${browserTimeZone})` },
+  { value: 'Asia/Kolkata', label: 'India (IST)' },
+  { value: 'UTC', label: 'UTC' },
+  { value: 'America/New_York', label: 'US Eastern' },
+  { value: 'America/Chicago', label: 'US Central' },
+  { value: 'America/Denver', label: 'US Mountain' },
+  { value: 'America/Los_Angeles', label: 'US Pacific' }
+];
+
+const pad = (value) => String(value).padStart(2, '0');
+
+const parseDateTimeInput = (value) => {
+  if (!value) return null;
+  const [datePart, timePart] = value.split('T');
+  if (!datePart || !timePart) return null;
+
+  const [year, month, day] = datePart.split('-').map(Number);
+  const [hour, minute] = timePart.split(':').map(Number);
+
+  if ([year, month, day, hour, minute].some(Number.isNaN)) {
+    return null;
+  }
+
+  return { year, month, day, hour, minute };
+};
+
+const getDatePartsInTimeZone = (date, timeZone) => {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+
+  const parts = formatter.formatToParts(date);
+  const map = {};
+  parts.forEach(({ type, value }) => {
+    map[type] = value;
+  });
+
+  return {
+    year: Number(map.year),
+    month: Number(map.month),
+    day: Number(map.day),
+    hour: Number(map.hour),
+    minute: Number(map.minute)
+  };
+};
+
+const formatInputFromParts = ({ year, month, day, hour, minute }) =>
+  `${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}`;
+
+const convertInputInTimeZoneToUtcDate = (value, timeZone) => {
+  const parsed = parseDateTimeInput(value);
+  if (!parsed) return null;
+
+  let utcMs = Date.UTC(parsed.year, parsed.month - 1, parsed.day, parsed.hour, parsed.minute);
+
+  for (let i = 0; i < 3; i += 1) {
+    const zonedParts = getDatePartsInTimeZone(new Date(utcMs), timeZone);
+    const targetMs = Date.UTC(parsed.year, parsed.month - 1, parsed.day, parsed.hour, parsed.minute);
+    const zonedMs = Date.UTC(
+      zonedParts.year,
+      zonedParts.month - 1,
+      zonedParts.day,
+      zonedParts.hour,
+      zonedParts.minute
+    );
+    const diff = targetMs - zonedMs;
+    utcMs += diff;
+
+    if (diff === 0) {
+      break;
+    }
+  }
+
+  return new Date(utcMs);
+};
+
+const convertUtcDateToInputInTimeZone = (dateLike, timeZone) => {
+  if (!dateLike) return '';
+  const date = new Date(dateLike);
+  if (Number.isNaN(date.getTime())) return '';
+  return formatInputFromParts(getDatePartsInTimeZone(date, timeZone));
+};
+
+const convertInputBetweenTimeZones = (value, fromTimeZone, toTimeZone) => {
+  if (!value) return '';
+  const utcDate = convertInputInTimeZoneToUtcDate(value, fromTimeZone);
+  if (!utcDate) return '';
+  return convertUtcDateToInputInTimeZone(utcDate, toTimeZone);
+};
+
+const formatPreviewInTimeZone = (value, sourceTimeZone, targetTimeZone) => {
+  if (!value) return 'Not set';
+  const utcDate = convertInputInTimeZoneToUtcDate(value, sourceTimeZone);
+  if (!utcDate) return 'Invalid date';
+  return new Intl.DateTimeFormat([], {
+    timeZone: targetTimeZone,
+    dateStyle: 'medium',
+    timeStyle: 'short'
+  }).format(utcDate);
+};
+
 const AdminEventsManager = () => {
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
   const [events, setEvents] = useState([]);
@@ -13,6 +123,7 @@ const AdminEventsManager = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [selectedTimeZone, setSelectedTimeZone] = useState(browserTimeZone);
   const [formData, setFormData] = useState({
     title: '',
     type: '',
@@ -27,9 +138,7 @@ const AdminEventsManager = () => {
 
   const formatDateForInput = (isoString) => {
     if (!isoString) return '';
-    const date = new Date(isoString);
-    const offsetMs = date.getTimezoneOffset() * 60000;
-    return new Date(date - offsetMs).toISOString().slice(0, 16);
+    return convertUtcDateToInputInTimeZone(isoString, selectedTimeZone);
   };
 
   const formatEventDateRange = (startIso, endIso) => {
@@ -83,6 +192,7 @@ const AdminEventsManager = () => {
       order: 0,
       isActive: true
     });
+    setSelectedTimeZone(browserTimeZone);
     setEditingId(null);
     setShowForm(false);
   };
@@ -96,19 +206,32 @@ const AdminEventsManager = () => {
   };
 
   const handleEdit = (eventItem) => {
+    const editTimeZone = browserTimeZone;
     setFormData({
       title: eventItem.title || '',
       type: eventItem.type || '',
-      startDate: formatDateForInput(eventItem.startDate),
-      endDate: formatDateForInput(eventItem.endDate),
+      startDate: convertUtcDateToInputInTimeZone(eventItem.startDate, editTimeZone),
+      endDate: convertUtcDateToInputInTimeZone(eventItem.endDate, editTimeZone),
       details: eventItem.details || '',
       location: eventItem.location || '',
       ctaUrl: eventItem.ctaUrl || '',
       order: eventItem.order || 0,
       isActive: eventItem.isActive
     });
+    setSelectedTimeZone(editTimeZone);
     setEditingId(eventItem._id);
     setShowForm(true);
+  };
+
+  const handleTimeZoneChange = (event) => {
+    const nextTimeZone = event.target.value;
+
+    setFormData((prev) => ({
+      ...prev,
+      startDate: convertInputBetweenTimeZones(prev.startDate, selectedTimeZone, nextTimeZone),
+      endDate: convertInputBetweenTimeZones(prev.endDate, selectedTimeZone, nextTimeZone)
+    }));
+    setSelectedTimeZone(nextTimeZone);
   };
 
   const handleDelete = async (id) => {
@@ -148,6 +271,10 @@ const AdminEventsManager = () => {
         ...formData,
         title: formData.title.trim(),
         type: formData.type.trim(),
+        startDate: convertInputInTimeZoneToUtcDate(formData.startDate, selectedTimeZone)?.toISOString() || '',
+        endDate: formData.endDate
+          ? convertInputInTimeZoneToUtcDate(formData.endDate, selectedTimeZone)?.toISOString() || ''
+          : '',
         details: formData.details.trim(),
         location: formData.location.trim(),
         ctaUrl: formData.ctaUrl.trim()
@@ -236,6 +363,22 @@ const AdminEventsManager = () => {
                       />
                     </div>
                     <div className="form-section">
+                      <label htmlFor="event-timezone">Timezone *</label>
+                      <select
+                        id="event-timezone"
+                        value={selectedTimeZone}
+                        onChange={handleTimeZoneChange}
+                        className="form-input"
+                      >
+                        {TIMEZONE_OPTIONS.map((option, index) => (
+                          <option key={`${option.value}-${index}`} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="form-help">Choose the timezone you want to schedule in. We will convert it correctly before saving.</p>
+                    </div>
+                    <div className="form-section">
                       <label htmlFor="event-startDate">Start Date & Time *</label>
                       <input
                         id="event-startDate"
@@ -245,7 +388,7 @@ const AdminEventsManager = () => {
                         onChange={handleInputChange}
                         className="form-input"
                       />
-                      <p className="form-help">Enter the event time in your local timezone. Visitors in other time zones will see the converted local time.</p>
+                      <p className="form-help">This value is interpreted as {selectedTimeZone}. Visitors in other time zones will see their local equivalent.</p>
                     </div>
                   </div>
 
@@ -300,6 +443,32 @@ const AdminEventsManager = () => {
                       className="form-textarea"
                     />
                   </div>
+
+                  {formData.startDate ? (
+                    <div className="form-section">
+                      <label>Time Preview</label>
+                      <div className="empty-state-card" style={{ textAlign: 'left' }}>
+                        <p className="empty-state-description">
+                          <strong>Scheduled in {selectedTimeZone}:</strong> {formatPreviewInTimeZone(formData.startDate, selectedTimeZone, selectedTimeZone)}
+                        </p>
+                        <p className="empty-state-description">
+                          <strong>Saved as UTC:</strong> {formatPreviewInTimeZone(formData.startDate, selectedTimeZone, 'UTC')}
+                        </p>
+                        <p className="empty-state-description">
+                          <strong>India:</strong> {formatPreviewInTimeZone(formData.startDate, selectedTimeZone, 'Asia/Kolkata')}
+                        </p>
+                        <p className="empty-state-description">
+                          <strong>US Eastern:</strong> {formatPreviewInTimeZone(formData.startDate, selectedTimeZone, 'America/New_York')}
+                        </p>
+                        <p className="empty-state-description">
+                          <strong>US Central:</strong> {formatPreviewInTimeZone(formData.startDate, selectedTimeZone, 'America/Chicago')}
+                        </p>
+                        <p className="empty-state-description">
+                          <strong>US Pacific:</strong> {formatPreviewInTimeZone(formData.startDate, selectedTimeZone, 'America/Los_Angeles')}
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
 
                   <div className="form-section">
                     <label htmlFor="event-cta">Link (Optional)</label>
